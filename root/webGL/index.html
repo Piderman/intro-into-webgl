@@ -1,0 +1,156 @@
+<html>
+	<head>
+		<title>derping with THREE.js</title>
+		<style>canvas { width: 100%; height: 100% }</style>
+	</head>
+	<body>
+		<!-- <script src="//rawgithub.com/mrdoob/three.js/master/build/three.js"></script> -->
+		<script src="/libs/three.min.js"></script>
+		<script src="/libs/controls/OrbitControls.js"></script>
+		<script>
+
+			var camera, controls, scene, renderer;
+			init();
+			animate();
+
+			//globals
+			var tree__trunk,
+				tree__trunk__geo,
+				tree__trunk__mat,
+				tree__leaves,
+				tree__leaves__geo,
+				tree__leaves__mat,
+				house,
+				house__g,
+				house__m,
+				roof,
+				roof__g,
+				roof_m;
+
+
+
+			//inits the 'scene'?
+			function init() {
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+	
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+
+				
+				createHouse();
+				createTree();
+
+				scene.add(tree__trunk);
+	
+				camera.position.z = 10;
+	
+	
+				//adds a camera and movable viewport?
+				controls = new THREE.OrbitControls( camera );
+				controls.userPan = false;
+				controls.addEventListener( 'change', render );
+			}
+
+			function createTree(){
+				var treeX = 5;
+				
+				tree__leaves__geo = new THREE.SphereGeometry(1,10,10);
+				tree__leaves__mat = new THREE.MeshBasicMaterial({
+					color: "#bada55",
+					wireframe : true
+				});
+				tree__leaves = new THREE.Mesh( tree__leaves__geo, tree__leaves__mat );
+				tree__leaves.position.x = treeX;
+				tree__leaves.position.y = 2;
+
+
+
+				tree__trunk__geo = new THREE.CubeGeometry(1,2,1);
+				tree__trunk__mat = new THREE.MeshBasicMaterial({
+					color: "#764505", //brown
+					wireframe : true
+				});
+
+				tree__trunk = new THREE.Mesh( tree__trunk__geo, tree__trunk__mat );
+
+				tree__trunk.position.x = treeX;
+
+
+				scene.add(tree__leaves);
+				scene.add(tree__trunk);
+
+			}
+
+			function createHouse(){
+				var houseDims = [4, 2, 4], //x y z || width height depth
+					houseHeigh = 2,
+					roofHeight = 0.5;
+				
+				house__geo = new THREE.CubeGeometry(houseDims[0],houseDims[1],houseDims[2]);
+				house__mat = new THREE.MeshBasicMaterial({
+					color: "#eacb1d",//yellow
+					wireframe : true
+				});
+				house = new THREE.Mesh( house__geo, house__mat );
+				
+
+				//another part of the house
+				house__front_geo = new THREE.CubeGeometry(2,2,2);
+				house__front = new THREE.Mesh(house__front_geo, house__mat);
+
+				house__front.position.x = 0;
+				house__front.position.z = (4/2) + (2/2);
+
+
+				roof__geo = new THREE.CubeGeometry(4,roofHeight,4);
+				roof__mat = new THREE.MeshBasicMaterial({
+					color: "red",
+					wireframe : true
+				});
+
+				roof = new THREE.Mesh( roof__geo, roof__mat );
+
+				roof.position.y = houseHeigh/2 + roofHeight/2; //half my height + half my 'parents' height
+
+
+				scene.add(house);
+				scene.add(house__front);
+				scene.add(roof);
+
+			}
+
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+				controls.update();
+
+			}
+
+			function render() {
+
+				renderer.render( scene, camera );
+
+			}
+
+
+			//move based on the click
+			// $("body").on("click", function(event){
+			// 	var increment = 0.25;
+
+			// 	if (event.pageX < window.innerWidth / 2) {
+			// 		console.log("clicked left");
+			// 	} else {
+			// 		console.log("clicked right");
+			// 	}
+			// });
+
+
+
+
+		</script>
+	</body>
+</html>
