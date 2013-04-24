@@ -1,4 +1,6 @@
 (function(){
+	//workflow to stick to: create | import geo, setup lights, render scene. Watch out for callbacks and async
+
 	var container, camera, controls, scene, renderer, stats;
 
 	container = document.getElementById( 'container' );
@@ -10,22 +12,55 @@
 		createStats();
 		initScene();
 
-		createLights();
-
-		importHouse();
+		createScenery();
+		//importHouse();
 
 		var geometry = new THREE.CubeGeometry(1,1,1);
-		var material =  new THREE.MeshLambertMaterial( { color:0xffffff, shading: THREE.FlatShading } );
+		var material =  new THREE.MeshLambertMaterial( { color:"#bada55", shading: THREE.FlatShading } );
 		var mesh = new THREE.Mesh( geometry, material );
 		mesh.position.set(2,1,1);
 
 		scene.add( mesh );
 
 
+		//will this work?
+		var floorPlane = {
+			geometry : new THREE.PlaneGeometry(10,10,10,10),
+			material : new THREE.MeshLambertMaterial({
+				color: "#fff",
+				wireframe : true
+			})
+		};
 
+		floorPlane.mesh = new THREE.Mesh(floorPlane.geometry, floorPlane.material)
+		floorPlane.mesh.rotation.set(-90* (Math.PI/180), 0, 0);
+
+		scene.add( floorPlane.mesh );
+
+
+		createLights();
 		// renderer
-		createRenderer();
+		createRenderer(); //was running async here, so the house didn't exist yet but scene had been rendered
 		
+
+	}
+
+	//helper for generic material with color w wireframe toggle
+	function createGenericMaterial(hexColor, isWireframe) {
+		createdMaterial = new THREE.MeshLambertMaterial({
+			color : hexColor,
+			wireframe : (!isWireframe) ? false : true //means we can pass optional?
+		});
+		//return the created materal
+		return createdMaterial;
+	}
+
+	//practice making and placing various geo guys
+	function createScenery() {
+		var genericMaterial = createGenericMaterial("#f00");
+
+		console.log(genericMaterial);
+
 
 	}
 
@@ -53,32 +88,37 @@
 	}
 
 	function createLights() {
-		var light = new THREE.PointLight( 0xff0000, 1, 100 );
-		light.position.set( 50, 50, 50 );
+		var light = new THREE.PointLight( "#ececcd", 0.5, 60 );
+		light.position.set( -10, 10, 10 );
 		scene.add( light );
 
-		// light = new THREE.DirectionalLight( "#e7e7d6" );
-		// light.position.set( 10, 10, 10 );
-		// scene.add( light );
-
-		light = new THREE.AmbientLight( "#e7e7d6" );
+		light = new THREE.DirectionalLight( "#fff" );
+		light.position.set( 20, 20, 20 );
 		scene.add( light );
+
+		//is really bright for some reason
+		// abmLight = new THREE.AmbientLight( "#000 " );
+		// scene.add( abmLight );
 	}
 
 	//import a model from bender using three.js exported
 	function importHouse() {
 		var loader = new THREE.JSONLoader();
 		// loader.load( "/webgl/assets/houseMesh.js", insertGeo);
+
+		//if the JSON has a material, we use "material" to get it
 		loader.load( "/webgl/assets/houseUV.js", function(geometry, material){
 			var house__Material = new THREE.MeshFaceMaterial(material)
 				houseMesh = new THREE.Mesh(geometry, house__Material);
 			
 			scene.add(houseMesh);
-		});
 
+			//needed in the callback so we now its complete. Do we need a fn() for when ALL imports are done?
+		});
 	}
 
 
+	// function 
 
 
 	
@@ -95,6 +135,7 @@
 		//
 
 		window.addEventListener( 'resize', onWindowResize, false );
+		render();
 	}
 	
 	function onWindowResize() {

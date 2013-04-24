@@ -1,3 +1,35 @@
- ☐ import  mesh
- ☐ create a texture
- ☐ import mesh WITH material
+ ✔ import  mesh @done (13-04-23 12:47)
+ ✔ create a texture @done (13-04-23 16:13)
+ ✔ import mesh WITH material @done (13-04-23 14:58)
+ ☐ control camera with buttons?
+ ☐ normal map?
+ ☐ bump map?
+ ☐ spec map?
+ ☐ texture with alpha
+
+
+goals:
+ ☐ remove orbital cotnrols
+ ☐ can move camera with "prev | next"
+ ☐ set "points" in there scene that fire off events
+ ☐ change DOM based on current "point"
+ ☐ animate / move objects 
+ ☐ cast shadow
+
+
+ cheatsheet:
+ geo + mat = mesh
+ add mesh into scene 
+
+ geo.[x].set:
+   rotation
+   scale
+   position
+
+
+
+
+ 
+
+
+
