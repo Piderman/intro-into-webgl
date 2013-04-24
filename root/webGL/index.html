@@ -16,10 +16,40 @@
 
 			.camera__button__left { left: 0; }
 			.camera__button__right { right: 0; }
+
+
+			.popup {
+				position: absolute;
+				top: 0;
+				right: 0;
+				width: 200px;
+				display: none; /* toggled by js */
+				padding: 10px 20px;
+				background: #fff;
+				background: rgba(255,255,255,0.8);
+			}
 		</style>
 	</head>
 	<body id="body">
-		<div id="container"></div>
+		<div id="container"> </div>
+		
+		<div id="triangle" class="popup" data-sceneTrigger="triangle">
+			<h2>Triangle</h2>
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut imperdiet, metus sollicitudin dictum porttitor, tellus tellus laoreet magna, sed aliquam 
+		</div>
+
+		<div id="cylinder" class="popup" data-sceneTrigger="cylinder">
+			<h2>cylinder</h2>
+			Aliquam lacinia ullamcorper massa a aliquam. Praesent et ante risus, a dignissim magna. Proin faucibus lorem rhoncus risus volutpat viverra vitae a neque. Nullam sit amet sem nunc, non tempor velit. Duis mi velit, accumsan quis gravida quis, euismod eu neque.
+		</div>
+		<div id="largeCube" class="popup" data-sceneTrigger="largeCube">
+			<h2>largeCube</h2>
+			Sed vehicula, leo eu feugiat scelerisque, sem nisl volutpat felis, volutpat suscipit nulla leo eleifend ligula. Etiam in erat ligula, sit amet sodales enim. Suspendisse potenti. Proin fermentum lectus cursus urna placerat eu tempus odio malesuada. Sed posuere, nibh ac pellentesque sollicitudin, 
+		</div>
+		<div id="cone" class="popup" data-sceneTrigger="cone">
+			<h2>cone</h2>
+			Quisque congue metus metus, vitae ullamcorper nulla. Aenean et tellus nec tortor sollicitudin pellentesque. Phasellus rutrum mauris ac lectus vehicula eget scelerisque dui rutrum. Suspendisse at justo diam, vel imperdiet arcu. Nunc iaculis pulvinar enim a fringilla. Mauris nec
+		</div>
 		<script src="/libs/three.min.js"></script>
 		<script src="/libs/controls/OrbitControls.js"></script> <!-- todo: remove? -->
 		<script src="/libs/tween.min.js"></script>

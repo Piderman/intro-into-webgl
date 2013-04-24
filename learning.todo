@@ -29,7 +29,15 @@ ie = no WebGL render
 ie can support canvas
 iOS can support canvas, frame rate DROPS massively (also bad for performance, not needed methinks)
 
- geo.[x].set:
+
+mc naming convention:
+objectName
+  geo  = geometry type
+  mat = material in use
+  interactText = text that shows on click
+  mesh = mesh created from geo & mat
+
+ name.mesh.[x].set:
    rotation
    scale
    position

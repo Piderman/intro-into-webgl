@@ -9,6 +9,7 @@
 	animate();
 
 	function init() {
+		projector = new THREE.Projector(); //needed for testing who we clicked on
 		createStats();
 		initScene(true);
 
@@ -63,21 +64,23 @@
 
 	//create mesh from all obj we pass
 	/*
-	1: could be multi so loop
-	2: force default material if there isn't one
-	3: create and insert new mesh
+	1: force default material if there isn't one
+	2: create and insert new mesh
+	3: "onclick" of an mesh, we cannot log the "largeCube" for eg, so we make a new prop to send ours to
 	*/
 	function generateMesh(obj) {
 		for (var i = 0; i < obj.length; i++) { //[1]
 			var current = obj[i];
 
-			if (!current.mat) { //[2]
+			if (!current.mat) { //[1]
 				console.warn("No material passed, using default 'generateMaterial()'");
-				
+
 				current.mat = generateMaterial("#b3b3b5");
 			};
 
-			current.mesh = new THREE.Mesh(current.geo, current.mat); //[3]
+			current.mesh = new THREE.Mesh(current.geo, current.mat); //[2]
+			current.mesh.dialogueID = current.dialogueID; //[3]
+			
 			scene.add(current.mesh);
 		};
 	}
@@ -88,27 +91,26 @@
 		//need global for access
 		largeCube = {
 			geo : new THREE.CubeGeometry(5,5,5),
-			interactText : "large cube"
+			dialogueID : "largeCube"
 		},
 		cylinderGuy = {
 			geo : new THREE.CylinderGeometry(1,1,3,15,1), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : generateMaterial("#ffa740"),
-			clickText : "cylinderGuy"
+			dialogueID : "cylinder"
 		},
 		triangleGuy = {
 			geo : new THREE.CylinderGeometry(0,1,2,3,1),
 			mat : generateMaterial("#00ffd2"),
-			interactText : "some text"
+			dialogueID : "triangle"
 		},
 		coneGuy = {
 			geo : new THREE.CylinderGeometry(0,1,2,20,1),
 			mat : generateMaterial("#0619a4"),
-			interactText : "roger"
+			dialogueID : "cone"
 		},
 		anotherConeGuy = {
 			geo : new THREE.CylinderGeometry(0,0.5,1,10,1),
-			mat : generateMaterial("#9a40ff"),
-			interactText : "mini cone"
+			mat : generateMaterial("#9a40ff")
 		};
 
 
@@ -199,16 +201,15 @@
 	}
 
 
-	$("#container").on("click", function(){
-		// event.preventDefault();
-		console.log("trigger animation");
+	$("#container").on("click", function(event){
+		detectClickedObj(event);
 
-
-		new TWEEN.Tween(largeCube.mesh.rotation ).to( {
-			x: Math.random() * 2 * Math.PI,
-			y: Math.random() * 2 * Math.PI,
-			z: Math.random() * 2 * Math.PI }, 2000 )
-		.easing( TWEEN.Easing.Elastic.Out).start();
+		//testing tween from canvas_interactive_cubes_tween
+		// new TWEEN.Tween(largeCube.mesh.rotation ).to( {
+		// 	x: Math.random() * 2 * Math.PI,
+		// 	y: Math.random() * 2 * Math.PI,
+		// 	z: Math.random() * 2 * Math.PI }, 2000 )
+		// .easing( TWEEN.Easing.Elastic.Out).start();
 
 		
 	});
@@ -219,8 +220,8 @@
 	
 	//three.js screen needed stuff. Caution : science dog
 	function createRenderer(){
-		// renderer = new THREE.WebGLRenderer( { antialias: false } );
-		renderer = new THREE.CanvasRenderer( { antialias: false } );
+		renderer = new THREE.WebGLRenderer( { antialias: false } );
+		// renderer = new THREE.CanvasRenderer( { antialias: false } );
 		// renderer.setClearColor( scene.fog.color, 1 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 
@@ -270,16 +271,34 @@
 	}
 
 	//works in in linear sequence
-	function moveCamera(sceneNumber){
+	/*function moveCamera(sceneNumber){
 		var incrementBy = (dir == "left") ? -1 : 1,
 			newPosition = triangleGuy.mesh.position.x + incrementBy;
 
 		new TWEEN.Tween(triangleGuy.mesh.position ).to( {
 			x: newPosition}, 500 )
 		.easing( TWEEN.Easing.Quadratic.Out).start();
+	}*/
+
+
+	//https://github.com/mrdoob/three.js/blob/master/examples/canvas_interactive_cubes_tween.html#L101
+	function detectClickedObj (event) {
+		var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+		
+		projector.unprojectVector( vector, camera );
+
+		var raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+		var intersects = raycaster.intersectObjects( scene.children );
+
+		//get me the guy we interesected / clicked
+		if ( intersects.length > 0 ) {
+			showShapeDialogue(intersects[0].object.dialogueID);
+		}
 	}
 
 
+	//todo: clean up
 	var $body = $("#body");
 
 	$buttonLeft = $("<button>", {
@@ -295,4 +314,11 @@
 	}).on("click", function(){
 		moveObject("right");
 	}).appendTo($body);
+
+	function showShapeDialogue (id) {
+		$("div.popup").hide()
+			.filter( function(){
+				return $(this).attr("id") == id;
+		}).show();
+	}
 })();
