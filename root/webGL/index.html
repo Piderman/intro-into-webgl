@@ -1,19 +1,30 @@
-<html>
-	<head>
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
 		<title>derping with THREE.js</title>
 		<style>
+			/* force all to be as tall as window */
+			html, body, #container { height: 100%; }
 			body { margin: 0; padding: 0;}
 			canvas { width: 100%; height: 100%; }
+
+			.camera__button {
+				position: absolute;
+				bottom: 0;
+			}
+
+			.camera__button__left { left: 0; }
+			.camera__button__right { right: 0; }
 		</style>
 	</head>
-	<body>
+	<body id="body">
 		<div id="container"></div>
-		<!-- <script src="//rawgithub.com/mrdoob/three.js/master/build/three.js"></script> -->
 		<script src="/libs/three.min.js"></script>
-		<script src="/libs/controls/OrbitControls.js"></script>
+		<script src="/libs/controls/OrbitControls.js"></script> <!-- todo: remove? -->
+		<script src="/libs/tween.min.js"></script>
 		<script src="/libs/stats.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		<script src="house.three.js"></script>
-
-		<small>brick texture &copy; http://www.mayang.com/textures/Architectural/html/Brick/brick_texture_9181117.JPG</small>
 	</body>
 </html>

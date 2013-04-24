@@ -10,7 +10,7 @@
 
 	function init() {
 		createStats();
-		initScene();
+		initScene(true);
 
 		createScenery();
 		//importHouse();
@@ -24,18 +24,19 @@
 
 
 		//will this work?
-		var floorPlane = {
-			geometry : new THREE.PlaneGeometry(10,10,10,10),
-			material : new THREE.MeshLambertMaterial({
-				color: "#fff",
-				wireframe : true
-			})
-		};
+		// var floorPlane = {
+		// 	geometry : new THREE.PlaneGeometry(20,20,20,20), //x-z, segments. keep as 1:1 so we can get good sense of scale/grid
+		// 	material : new THREE.MeshLambertMaterial({
+		// 		color: "tomato",
+		// 		wireframe : true
+		// 	})
+		// };
 
-		floorPlane.mesh = new THREE.Mesh(floorPlane.geometry, floorPlane.material)
-		floorPlane.mesh.rotation.set(-90* (Math.PI/180), 0, 0);
+		// floorPlane.mesh = new THREE.Mesh(floorPlane.geometry, floorPlane.material)
+		// floorPlane.mesh.rotation.set(-90* (Math.PI/180), 0, 0);
 
-		scene.add( floorPlane.mesh );
+		// scene.add( floorPlane.mesh );
+
 
 
 		createLights();
@@ -46,22 +47,88 @@
 	}
 
 	//helper for generic material with color w wireframe toggle
-	function createGenericMaterial(hexColor, isWireframe) {
+	function generateMaterial(hexColor, isWireframe) {
 		createdMaterial = new THREE.MeshLambertMaterial({
-			color : hexColor,
+			color : (!hexColor) ? "#bada55": hexColor,
+			// wireframeLinewidth : 3,
 			wireframe : (!isWireframe) ? false : true //means we can pass optional?
 		});
-		//return the created materal
+
 		return createdMaterial;
 	}
 
+
+	//----------------------------------------------------------------------------
+
+
+	//create mesh from all obj we pass
+	/*
+	1: could be multi so loop
+	2: force default material if there isn't one
+	3: create and insert new mesh
+	*/
+	function generateMesh(obj) {
+		for (var i = 0; i < obj.length; i++) { //[1]
+			var current = obj[i];
+
+			if (!current.mat) { //[2]
+				console.warn("No material passed, using default 'generateMaterial()'");
+				
+				current.mat = generateMaterial("#b3b3b5");
+			};
+
+			current.mesh = new THREE.Mesh(current.geo, current.mat); //[3]
+			scene.add(current.mesh);
+		};
+	}
+
+
 	//practice making and placing various geo guys
 	function createScenery() {
-		var genericMaterial = createGenericMaterial("#f00");
+		//need global for access
+		largeCube = {
+			geo : new THREE.CubeGeometry(5,5,5),
+			interactText : "large cube"
+		},
+		cylinderGuy = {
+			geo : new THREE.CylinderGeometry(1,1,3,15,1), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : generateMaterial("#ffa740"),
+			clickText : "cylinderGuy"
+		},
+		triangleGuy = {
+			geo : new THREE.CylinderGeometry(0,1,2,3,1),
+			mat : generateMaterial("#00ffd2"),
+			interactText : "some text"
+		},
+		coneGuy = {
+			geo : new THREE.CylinderGeometry(0,1,2,20,1),
+			mat : generateMaterial("#0619a4"),
+			interactText : "roger"
+		},
+		anotherConeGuy = {
+			geo : new THREE.CylinderGeometry(0,0.5,1,10,1),
+			mat : generateMaterial("#9a40ff"),
+			interactText : "mini cone"
+		};
 
-		console.log(genericMaterial);
 
+			//make mah meshes ><
+			generateMesh([
+				cylinderGuy,
+				largeCube,
+				triangleGuy,
+				coneGuy,
+				anotherConeGuy
+			]);
 
+			//can we move once its added
+			largeCube.mesh.position.set(-6,3.5,-8); //center is height / 2
+			triangleGuy.mesh.position.set(-5,1,2);
+			coneGuy.mesh.position.set(2, 1 ,-8);
+			anotherConeGuy.mesh.position.set(1, 0.5 ,-6);
+
+			cylinderGuy.mesh.rotation.set(0,0 , 90*(Math.PI/180));
+			cylinderGuy.mesh.position.set(2,1,0); //have been rotated 90deg so my "height" is my radius
 	}
 
 	function createStats () {
@@ -74,25 +141,39 @@
 
 
 	//creates camera, controls and scene
-	function initScene() {
+	function initScene(isHelper) {
 		camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-		camera.position.z = 5;
+		camera.position.set(0, 5, 10);
 
 		controls = new THREE.OrbitControls( camera );
-			controls.userPan = false;
-			controls.userPanSpeed = 0; //0 means they cant pan?
+			controls.userPan = false; //disables keyboard
+			controls.userPanSpeed = 0; //no pan AT all, even rMouse
 		
 		controls.addEventListener( 'change', render );
 
 		scene = new THREE.Scene();
+
+
+		//helper functions in init: axis debugger and grid
+		if (isHelper){
+			var helpers = {
+				axis : new THREE.AxisHelper(2),
+				grid : new THREE.GridHelper(10, 1) //units FROM origin, units per divisional line
+			};
+
+
+			helpers.axis.position.set(-10, 1, 0);
+			scene.add(helpers.axis);
+			scene.add(helpers.grid);
+		}
 	}
 
 	function createLights() {
-		var light = new THREE.PointLight( "#ececcd", 0.5, 60 );
+		var light = new THREE.PointLight( "#fff", 0.8, 60 );
 		light.position.set( -10, 10, 10 );
 		scene.add( light );
 
-		light = new THREE.DirectionalLight( "#fff" );
+		light = new THREE.DirectionalLight( "#f1f0cb", 0.8 ); //soft yellow
 		light.position.set( 20, 20, 20 );
 		scene.add( light );
 
@@ -118,15 +199,28 @@
 	}
 
 
-	// function 
+	$("#container").on("click", function(){
+		// event.preventDefault();
+		console.log("trigger animation");
+
+
+		new TWEEN.Tween(largeCube.mesh.rotation ).to( {
+			x: Math.random() * 2 * Math.PI,
+			y: Math.random() * 2 * Math.PI,
+			z: Math.random() * 2 * Math.PI }, 2000 )
+		.easing( TWEEN.Easing.Elastic.Out).start();
+
+		
+	});
 
 
 	
 	//----------------------------------------------------------------------------
 	
-	//three.js screen needed stuff oO 
+	//three.js screen needed stuff. Caution : science dog
 	function createRenderer(){
-		renderer = new THREE.WebGLRenderer( { antialias: false } );
+		// renderer = new THREE.WebGLRenderer( { antialias: false } );
+		renderer = new THREE.CanvasRenderer( { antialias: false } );
 		// renderer.setClearColor( scene.fog.color, 1 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 
@@ -151,9 +245,54 @@
 		requestAnimationFrame( animate );
 		controls.update();
 		stats.update();
+
+		render();
 	}
 
 	function render() {
+		TWEEN.update();
 		renderer.render( scene, camera );
 	}
+
+
+	
+	//----------------------------------------------------------------------------
+	
+	
+	//interaction events
+	function moveObject(dir){
+		var incrementBy = (dir == "left") ? -1 : 1,
+			newPosition = triangleGuy.mesh.position.x + incrementBy;
+
+		new TWEEN.Tween(triangleGuy.mesh.position ).to( {
+			x: newPosition}, 500 )
+		.easing( TWEEN.Easing.Quadratic.Out).start();
+	}
+
+	//works in in linear sequence
+	function moveCamera(sceneNumber){
+		var incrementBy = (dir == "left") ? -1 : 1,
+			newPosition = triangleGuy.mesh.position.x + incrementBy;
+
+		new TWEEN.Tween(triangleGuy.mesh.position ).to( {
+			x: newPosition}, 500 )
+		.easing( TWEEN.Easing.Quadratic.Out).start();
+	}
+
+
+	var $body = $("#body");
+
+	$buttonLeft = $("<button>", {
+		"class" : "camera__button camera__button__left",
+		text : "move left"
+	}).on("click", function(){
+		moveObject("left");
+	}).appendTo($body);
+
+	$buttonRight = $("<button>", {
+		"class" : "camera__button camera__button__right",
+		text : "move right"
+	}).on("click", function(){
+		moveObject("right");
+	}).appendTo($body);
 })();

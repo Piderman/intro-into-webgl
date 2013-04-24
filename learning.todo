@@ -6,6 +6,9 @@
  ☐ bump map?
  ☐ spec map?
  ☐ texture with alpha
+ ✔ fn() to create mesh from obj @done (13-04-24 15:05)
+ ☐ animate
+ ☐ create a callback fn() or a pub-sub?
 
 
 goals:
@@ -21,15 +24,12 @@ goals:
  geo + mat = mesh
  add mesh into scene 
 
+
+ie = no WebGL render
+ie can support canvas
+iOS can support canvas, frame rate DROPS massively (also bad for performance, not needed methinks)
+
  geo.[x].set:
    rotation
    scale
    position
-
-
-
-
- 
-
-
-
