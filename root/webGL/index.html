@@ -6,12 +6,34 @@
 		<style>
 			/* force all to be as tall as window */
 			html, body, #container { height: 100%; }
-			body { margin: 0; padding: 0;}
+			body { margin: 0; padding: 0; font-family: "Segoe UI"}
 			canvas { width: 100%; height: 100%; }
 
 			.camera__button {
 				position: absolute;
-				bottom: 0;
+				bottom: 45%;
+
+				padding: 10px 20px;
+				background: #444;
+				border: 0;
+				color: #ebebeb;
+				font-family: "Segoe UI"; font-size: 24px;
+				vertical-align: middle;
+				line-height: 2;
+				cursor: pointer;
+
+				background: -webkit-linear-gradient(top, #a3a3a3 0, #444444 100%);
+				-webkit-border-radius : 5px;
+			}
+
+			.camera__button:hover {
+				color: #000;
+				background: #9c9eda;
+				background: -webkit-linear-gradient(top, #9c9eda 0, #7072a0 100%);
+			}
+
+			.camera__button:active {
+				-webkit-transform: translate(2px, 2px);
 			}
 
 			.camera__button__left { left: 0; }
@@ -28,10 +50,19 @@
 				background: #fff;
 				background: rgba(255,255,255,0.8);
 			}
+
+			.cameraCoords {
+				position: absolute;
+				top: 0; right: 0;
+			}
 		</style>
 	</head>
 	<body id="body">
 		<div id="container"> </div>
+		<div id="startup" class="popup" data-sceneTrigger="startup">
+			<h2>startup / largeCube</h2>
+			Move the camera by clicking an object or via the "previous" and "next" buttons. 
+		</div>
 		
 		<div id="triangle" class="popup" data-sceneTrigger="triangle">
 			<h2>Triangle</h2>
@@ -42,14 +73,25 @@
 			<h2>cylinder</h2>
 			Aliquam lacinia ullamcorper massa a aliquam. Praesent et ante risus, a dignissim magna. Proin faucibus lorem rhoncus risus volutpat viverra vitae a neque. Nullam sit amet sem nunc, non tempor velit. Duis mi velit, accumsan quis gravida quis, euismod eu neque.
 		</div>
-		<div id="largeCube" class="popup" data-sceneTrigger="largeCube">
-			<h2>largeCube</h2>
-			Sed vehicula, leo eu feugiat scelerisque, sem nisl volutpat felis, volutpat suscipit nulla leo eleifend ligula. Etiam in erat ligula, sit amet sodales enim. Suspendisse potenti. Proin fermentum lectus cursus urna placerat eu tempus odio malesuada. Sed posuere, nibh ac pellentesque sollicitudin, 
-		</div>
-		<div id="cone" class="popup" data-sceneTrigger="cone">
-			<h2>cone</h2>
+		<div id="coneGuy" class="popup" data-sceneTrigger="coneGuy">
+			<h2>coneGuy</h2>
 			Quisque congue metus metus, vitae ullamcorper nulla. Aenean et tellus nec tortor sollicitudin pellentesque. Phasellus rutrum mauris ac lectus vehicula eget scelerisque dui rutrum. Suspendisse at justo diam, vel imperdiet arcu. Nunc iaculis pulvinar enim a fringilla. Mauris nec
 		</div>
+		<div id="miniCone" class="popup" data-sceneTrigger="miniCone">
+			<h2>miniCone</h2>
+			Too much work. Let's burn it and say we dumped it in the sewer. Quite possible. We live long and are celebrated poopers. Then we'll go with that data file! Man, I'm sore all over. I feel like I just went ten rounds with mighty Thor. No! Don't jump! Ow, my spirit!
+		</div>
+		<div id="otherCube" class="popup" data-sceneTrigger="otherCube">
+			<h2>otherCube</h2>
+			Sed vehicula, leo eu feugiat scelerisque, sem nisl volutpat felis, volutpat suscipit nulla leo eleifend ligula. Etiam in erat ligula, sit amet sodales enim. Suspendisse potenti. Proin fermentum lectus cursus urna placerat eu tempus odio malesuada. Sed posuere, nibh ac pellentesque sollicitudin, 
+		</div>
+		<div class="cameraCoords">
+			x: <span id="cameraCoords__x"></span> | 
+			y: <span id="cameraCoords__y"></span> | 
+			z: <span id="cameraCoords__z"></span>
+		</div>
+
+
 		<script src="/libs/three.min.js"></script>
 		<script src="/libs/controls/OrbitControls.js"></script> <!-- todo: remove? -->
 		<script src="/libs/tween.min.js"></script>

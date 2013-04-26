@@ -1,8 +1,57 @@
 (function(){
 	//workflow to stick to: create | import geo, setup lights, render scene. Watch out for callbacks and async
 
-	var container, camera, controls, scene, renderer, stats;
+	var container, camera, controls, scene, renderer, stats, isOrbit = true, isDebugCoords = false,
+		house ={
+			"currentView" : 0,
+			"scenes" : [
+				{ //array of scenes w their xyz and target xyz (if not specified its 0,0,0)
+					"position" : {
+						"x" : -6.77,
+						"y" : 4.22, 
+						"z" : 7.84
+					}
+				},
+				{
+					"position" : {
+						"x" : 2.65,
+						"y" : 3.20,
+						"z" : 5.25
+					}
+				},
+				{
+					"position" : {
+						"x" : 3.84,
+						"y" : 7.27,
+						"z" : 0
+					}
+				},
+				{
+					"position" : {
+						"x" : 5.76,
+						"y" : 0.8,
+						"z" : -11.64
+					}
+				},
+				{
+					"position" : {
+						"x" : -4.75,
+						"y" : 3.23,
+						"z" : -Math.PI // hahah woo
+					}
+				}
+				
+			]
+		};
 
+
+	if (isDebugCoords){
+		$debugX = $("#cameraCoords__x");
+		$debugY = $("#cameraCoords__y");
+		$debugZ = $("#cameraCoords__z");
+	} else {
+		$(".cameraCoords").hide();
+	}
 	container = document.getElementById( 'container' );
 
 	init();
@@ -14,30 +63,6 @@
 		initScene(true);
 
 		createScenery();
-		//importHouse();
-
-		var geometry = new THREE.CubeGeometry(1,1,1);
-		var material =  new THREE.MeshLambertMaterial( { color:"#bada55", shading: THREE.FlatShading } );
-		var mesh = new THREE.Mesh( geometry, material );
-		mesh.position.set(2,1,1);
-
-		scene.add( mesh );
-
-
-		//will this work?
-		// var floorPlane = {
-		// 	geometry : new THREE.PlaneGeometry(20,20,20,20), //x-z, segments. keep as 1:1 so we can get good sense of scale/grid
-		// 	material : new THREE.MeshLambertMaterial({
-		// 		color: "tomato",
-		// 		wireframe : true
-		// 	})
-		// };
-
-		// floorPlane.mesh = new THREE.Mesh(floorPlane.geometry, floorPlane.material)
-		// floorPlane.mesh.rotation.set(-90* (Math.PI/180), 0, 0);
-
-		// scene.add( floorPlane.mesh );
-
 
 
 		createLights();
@@ -67,6 +92,7 @@
 	1: force default material if there isn't one
 	2: create and insert new mesh
 	3: "onclick" of an mesh, we cannot log the "largeCube" for eg, so we make a new prop to send ours to
+	4: same for the associated scene reference
 	*/
 	function generateMesh(obj) {
 		for (var i = 0; i < obj.length; i++) { //[1]
@@ -80,6 +106,7 @@
 
 			current.mesh = new THREE.Mesh(current.geo, current.mat); //[2]
 			current.mesh.dialogueID = current.dialogueID; //[3]
+			current.mesh.sceneIndex = current.sceneIndex; //[4]
 			
 			scene.add(current.mesh);
 		};
@@ -89,28 +116,40 @@
 	//practice making and placing various geo guys
 	function createScenery() {
 		//need global for access
-		largeCube = {
-			geo : new THREE.CubeGeometry(5,5,5),
-			dialogueID : "largeCube"
+		largeCube = { //"house"
+			geo : new THREE.CubeGeometry(5,3,5),
+			mat : generateMaterial("#7f0407"),
+			dialogueID : "startup"
 		},
 		cylinderGuy = {
-			geo : new THREE.CylinderGeometry(1,1,3,15,1), //radius top, radius bottom, height, segments, height segments, open ended? 
+			geo : new THREE.CylinderGeometry(0.5,0.5,1,15,1), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : generateMaterial("#ffa740"),
-			dialogueID : "cylinder"
+			dialogueID : "cylinder",
+			sceneIndex: 1
 		},
 		triangleGuy = {
-			geo : new THREE.CylinderGeometry(0,1,2,3,1),
+			geo : new THREE.CylinderGeometry(0,0.5,1,3,1),
 			mat : generateMaterial("#00ffd2"),
-			dialogueID : "triangle"
+			dialogueID : "triangle",
+			sceneIndex: 0
 		},
 		coneGuy = {
 			geo : new THREE.CylinderGeometry(0,1,2,20,1),
-			mat : generateMaterial("#0619a4"),
-			dialogueID : "cone"
+			mat : generateMaterial("#4b4ff1"),
+			dialogueID : "coneGuy",
+			sceneIndex: 3
 		},
 		anotherConeGuy = {
 			geo : new THREE.CylinderGeometry(0,0.5,1,10,1),
-			mat : generateMaterial("#9a40ff")
+			mat : generateMaterial("#9a40ff"),
+			dialogueID : "miniCone",
+			sceneIndex: 2
+		},
+		otherCube = {
+			geo : new THREE.CubeGeometry(1,1,0.2),
+			mat : generateMaterial("#ffeb40"),
+			dialogueID : "otherCube",
+			sceneIndex: 4
 		};
 
 
@@ -120,17 +159,23 @@
 				largeCube,
 				triangleGuy,
 				coneGuy,
-				anotherConeGuy
+				anotherConeGuy,
+				otherCube
 			]);
 
-			//can we move once its added
-			largeCube.mesh.position.set(-6,3.5,-8); //center is height / 2
-			triangleGuy.mesh.position.set(-5,1,2);
-			coneGuy.mesh.position.set(2, 1 ,-8);
-			anotherConeGuy.mesh.position.set(1, 0.5 ,-6);
+			largeCube.mesh.name = "largeCube";
+			largeCube.mesh.position.set(0,1.5,0); //center is height / 2
+			triangleGuy.mesh.position.set(-5,0.5,2);
+			anotherConeGuy.mesh.position.set(2, 3.5 ,0);
+			coneGuy.mesh.position.set(3, 1 ,-6);
+			
 
 			cylinderGuy.mesh.rotation.set(0,0 , 90*(Math.PI/180));
-			cylinderGuy.mesh.position.set(2,1,0); //have been rotated 90deg so my "height" is my radius
+			cylinderGuy.mesh.position.set(1,2,3); //have been rotated 90deg so my "height" is my radius
+
+			otherCube.mesh.rotation.set(0,90*(Math.PI/180),0);
+			otherCube.mesh.position.set(-2.6,2,-1.5);
+
 	}
 
 	function createStats () {
@@ -145,13 +190,15 @@
 	//creates camera, controls and scene
 	function initScene(isHelper) {
 		camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-		camera.position.set(0, 5, 10);
+		camera.position.set(house.scenes[0].position.x, house.scenes[0].position.y, house.scenes[0].position.z);
 
-		controls = new THREE.OrbitControls( camera );
+		if (isOrbit){
+			controls = new THREE.OrbitControls( camera );
 			controls.userPan = false; //disables keyboard
 			controls.userPanSpeed = 0; //no pan AT all, even rMouse
-		
-		controls.addEventListener( 'change', render );
+			
+			controls.addEventListener( 'change', render );
+		}
 
 		scene = new THREE.Scene();
 
@@ -174,6 +221,10 @@
 		var light = new THREE.PointLight( "#fff", 0.8, 60 );
 		light.position.set( -10, 10, 10 );
 		scene.add( light );
+
+		var backLight = new THREE.PointLight( "#f3efd1", 0.2, 60 );
+		backLight.position.set( 0, 10, -10 );
+		scene.add( backLight );
 
 		light = new THREE.DirectionalLight( "#f1f0cb", 0.8 ); //soft yellow
 		light.position.set( 20, 20, 20 );
@@ -203,15 +254,6 @@
 
 	$("#container").on("click", function(event){
 		detectClickedObj(event);
-
-		//testing tween from canvas_interactive_cubes_tween
-		// new TWEEN.Tween(largeCube.mesh.rotation ).to( {
-		// 	x: Math.random() * 2 * Math.PI,
-		// 	y: Math.random() * 2 * Math.PI,
-		// 	z: Math.random() * 2 * Math.PI }, 2000 )
-		// .easing( TWEEN.Easing.Elastic.Out).start();
-
-		
 	});
 
 
@@ -244,15 +286,30 @@
 
 	function animate() {
 		requestAnimationFrame( animate );
-		controls.update();
+		
+		if(isOrbit) {
+			controls.update();
+		}
+		
 		stats.update();
 
 		render();
+
+		if (isDebugCoords) {
+			$debugX.text(camera.position.x);
+			$debugY.text(camera.position.y);
+			$debugZ.text(camera.position.z);
+		}
+
 	}
 
 	function render() {
 		TWEEN.update();
 		renderer.render( scene, camera );
+
+		if(!isOrbit) {
+			camera.lookAt(0,0,0);
+		}
 	}
 
 
@@ -270,19 +327,59 @@
 		.easing( TWEEN.Easing.Quadratic.Out).start();
 	}
 
-	//works in in linear sequence
-	/*function moveCamera(sceneNumber){
-		var incrementBy = (dir == "left") ? -1 : 1,
-			newPosition = triangleGuy.mesh.position.x + incrementBy;
-
-		new TWEEN.Tween(triangleGuy.mesh.position ).to( {
-			x: newPosition}, 500 )
+	//get who we touched and see if we cant move the camera there
+	function moveToObject (vectorCoords) {
+		//move mah cam to those coords
+		new TWEEN.Tween(camera.position).to( {
+			x: vectorCoords.x,
+			y: vectorCoords.y,
+			z: vectorCoords.z}, 500 )
 		.easing( TWEEN.Easing.Quadratic.Out).start();
-	}*/
+	}
+
+
+
+	
+	//----------------------------------------------------------------------------
+	
+	
+	//moving camera logic
+	//there is an array "sceneLocations" that has position(xyz) and optional camera rotate / lookat
+
+	//moves back and forth in linear fashion from prev/next button
+	function adjustSceneFromButton (dir) {
+		//do we go forward or back?
+		(dir=="next") ? house.currentView++ : house.currentView--;
+
+		//what about endpoints?
+		if (house.currentView < 0 ) {
+			house.currentView = house.scenes.length -1 ;
+		} else if (house.currentView > house.scenes.length - 1) {
+			house.currentView = 0;
+		}
+
+		animateCameraToScene(house.currentView);
+	}
+
+	function adjustSceneFromObject (index) {
+		house.currentView = (!index) ? 0 : index; //incase there is no associated index, reset
+		animateCameraToScene(house.currentView);
+	}
+
+	//animate the camera to a scene location
+	function animateCameraToScene(index) {
+		//move mah cam to those coors
+		new TWEEN.Tween(camera.position).to( {
+			x: house.scenes[index].position.x,
+			y: house.scenes[index].position.y,
+			z: house.scenes[index].position.z}, 500 )
+		.easing( TWEEN.Easing.Quadratic.Out).start();
+	}
 
 
 	//https://github.com/mrdoob/three.js/blob/master/examples/canvas_interactive_cubes_tween.html#L101
 	function detectClickedObj (event) {
+		//get where user clicked, cast a line and see who it touches
 		var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
 		
 		projector.unprojectVector( vector, camera );
@@ -294,6 +391,12 @@
 		//get me the guy we interesected / clicked
 		if ( intersects.length > 0 ) {
 			showShapeDialogue(intersects[0].object.dialogueID);
+			
+			//only show if not clicking the house
+			if(intersects[0].object.name != "largeCube") {
+				adjustSceneFromObject(intersects[0].object.sceneIndex);
+			}
+
 		}
 	}
 
@@ -303,18 +406,19 @@
 
 	$buttonLeft = $("<button>", {
 		"class" : "camera__button camera__button__left",
-		text : "move left"
+		text : "previous"
 	}).on("click", function(){
-		moveObject("left");
+		adjustSceneFromButton("prev");
 	}).appendTo($body);
 
 	$buttonRight = $("<button>", {
 		"class" : "camera__button camera__button__right",
-		text : "move right"
+		text : "next"
 	}).on("click", function(){
-		moveObject("right");
+		adjustSceneFromButton("next");
 	}).appendTo($body);
 
+	//show the current shape's HTML
 	function showShapeDialogue (id) {
 		$("div.popup").hide()
 			.filter( function(){
