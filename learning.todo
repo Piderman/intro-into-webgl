@@ -12,12 +12,14 @@
 
 
 goals:
- ☐ remove orbital controls
+ ✔ remove orbital controls @done (13-04-26 13:11)
  ✔ can move camera with "prev | next" @done (13-04-26 11:35)
  ✔ set "points" in the scene that fire off events @done (13-04-26 11:35)
  ✔ change DOM based on current "point" @done (13-04-26 11:35)
  ✔ animate / move objects @done (13-04-26 11:35)
  ☐ cast shadow
+ ☐ highlight interactive elements
+ ☐ 
 
 
  cheatsheet:

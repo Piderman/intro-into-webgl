@@ -1,43 +1,43 @@
 (function(){
 	//workflow to stick to: create | import geo, setup lights, render scene. Watch out for callbacks and async
 
-	var container, camera, controls, scene, renderer, stats, isOrbit = true, isDebugCoords = false,
+	var container, camera, controls, scene, renderer, stats, isOrbit = false, isDebugCoords = false,
 		house ={
 			"currentView" : 0,
 			"scenes" : [
 				{ //array of scenes w their xyz and target xyz (if not specified its 0,0,0)
 					"position" : {
-						"x" : -6.77,
-						"y" : 4.22, 
-						"z" : 7.84
+						"x" : -9.55,
+						"y" : 3.78,
+						"z" : 6.93
 					}
 				},
 				{
 					"position" : {
-						"x" : 2.65,
-						"y" : 3.20,
-						"z" : 5.25
+						"x" : -.01,
+						"y" : 4.41,
+						"z" : 13
 					}
 				},
 				{
 					"position" : {
-						"x" : 3.84,
-						"y" : 7.27,
-						"z" : 0
+						"x" : 8.04,
+						"y" : 8.6,
+						"z" : 0.11
 					}
 				},
 				{
 					"position" : {
-						"x" : 5.76,
-						"y" : 0.8,
-						"z" : -11.64
+						"x" : 3.73,
+						"y" : 1.27,
+						"z" : -10.47
 					}
 				},
 				{
 					"position" : {
-						"x" : -4.75,
-						"y" : 3.23,
-						"z" : -Math.PI // hahah woo
+						"x" : -5.41,
+						"y" : 1.36,
+						"z" : -5.63
 					}
 				}
 				
@@ -52,20 +52,30 @@
 	} else {
 		$(".cameraCoords").hide();
 	}
+
 	container = document.getElementById( 'container' );
 
 	init();
 	animate();
 
+
+
+	
+	//----------------------------------------------------------------------------
+	
+	
+	//begin
+
 	function init() {
 		projector = new THREE.Projector(); //needed for testing who we clicked on
 		createStats();
-		initScene(true);
+		initScene(true); //startup three.js required things. pass "true" for helper objs
 
-		createScenery();
+		createScenery(); //my custom objects
 
 
 		createLights();
+		
 		// renderer
 		createRenderer(); //was running async here, so the house didn't exist yet but scene had been rendered
 		
@@ -116,9 +126,9 @@
 	//practice making and placing various geo guys
 	function createScenery() {
 		//need global for access
-		largeCube = { //"house"
-			geo : new THREE.CubeGeometry(5,3,5),
-			mat : generateMaterial("#7f0407"),
+		theHouse = {
+			// geo : new THREE.CubeGeometry(5,3,5),
+			geo : importMeshFromFile("/webgl/assets/beach_house__mesh.js", "importedHouse"),
 			dialogueID : "startup"
 		},
 		cylinderGuy = {
@@ -156,26 +166,30 @@
 			//make mah meshes ><
 			generateMesh([
 				cylinderGuy,
-				largeCube,
 				triangleGuy,
 				coneGuy,
 				anotherConeGuy,
 				otherCube
 			]);
 
-			largeCube.mesh.name = "largeCube";
-			largeCube.mesh.position.set(0,1.5,0); //center is height / 2
-			triangleGuy.mesh.position.set(-5,0.5,2);
-			anotherConeGuy.mesh.position.set(2, 3.5 ,0);
-			coneGuy.mesh.position.set(3, 1 ,-6);
-			
+		// largeCube.mesh.name = "largeCube";
+		// largeCube.mesh.position.set(0,1.5,0); //center is height / 2
+		triangleGuy.mesh.position.set(-5,0.5,2);
+		anotherConeGuy.mesh.position.set(2, 3.5 ,0);
+		coneGuy.mesh.position.set(3, 1 ,-6);
+		
 
-			cylinderGuy.mesh.rotation.set(0,0 , 90*(Math.PI/180));
-			cylinderGuy.mesh.position.set(1,2,3); //have been rotated 90deg so my "height" is my radius
+		cylinderGuy.mesh.rotation.set(0,0 , 90*(Math.PI/180));
+		cylinderGuy.mesh.position.set(1,2,3); //have been rotated 90deg so my "height" is my radius
 
-			otherCube.mesh.rotation.set(0,90*(Math.PI/180),0);
-			otherCube.mesh.position.set(-2.6,2,-1.5);
+		otherCube.mesh.rotation.set(0,90*(Math.PI/180),0);
+		otherCube.mesh.position.set(-2.6,2,-2.5);
+	}
 
+
+	//eeep callback
+	function houseCallback() {
+		theHouse.mesh.position.set(0,0,5);
 	}
 
 	function createStats () {
@@ -215,39 +229,44 @@
 			scene.add(helpers.axis);
 			scene.add(helpers.grid);
 		}
+		// importedHouse.position.set(0,0,5);
+
 	}
 
 	function createLights() {
-		var light = new THREE.PointLight( "#fff", 0.8, 60 );
-		light.position.set( -10, 10, 10 );
+		var light = new THREE.PointLight( "#ffffff", 1, 60 );
+		light.position.set( -10, 80, 10 );
 		scene.add( light );
 
-		var backLight = new THREE.PointLight( "#f3efd1", 0.2, 60 );
-		backLight.position.set( 0, 10, -10 );
+		var backLight = new THREE.PointLight( "#f3efd1", 0.4, 60 );
+		backLight.position.set( 0, 40, -10 );
 		scene.add( backLight );
 
 		light = new THREE.DirectionalLight( "#f1f0cb", 0.8 ); //soft yellow
-		light.position.set( 20, 20, 20 );
+		light.position.set( 10, 80, 5 );
 		scene.add( light );
 
-		//is really bright for some reason
-		// abmLight = new THREE.AmbientLight( "#000 " );
+		// is really bright for some reason
+		// abmLight = new THREE.AmbientLight( "#404040" );
 		// scene.add( abmLight );
 	}
 
-	//import a model from bender using three.js exported
-	function importHouse() {
+	//import a model from bender using three.js export plugin
+	function importMeshFromFile(pathToFile, friendlyName) {
 		var loader = new THREE.JSONLoader();
-		// loader.load( "/webgl/assets/houseMesh.js", insertGeo);
+		
+		loader.load( pathToFile, function(geometry, material){
 
-		//if the JSON has a material, we use "material" to get it
-		loader.load( "/webgl/assets/houseUV.js", function(geometry, material){
-			var house__Material = new THREE.MeshFaceMaterial(material)
-				houseMesh = new THREE.Mesh(geometry, house__Material);
-			
-			scene.add(houseMesh);
+			var importedMaterial = new THREE.MeshFaceMaterial(material),
+				importedMesh = new THREE.Mesh(geometry, importedMaterial);
 
-			//needed in the callback so we now its complete. Do we need a fn() for when ALL imports are done?
+			importedMesh.name = friendlyName;
+			scene.add(importedMesh);
+
+			if (friendlyName == "importedHouse") {
+				theHouse.mesh = importedMesh;
+				houseCallback();
+			}
 		});
 	}
 
@@ -263,8 +282,6 @@
 	//three.js screen needed stuff. Caution : science dog
 	function createRenderer(){
 		renderer = new THREE.WebGLRenderer( { antialias: false } );
-		// renderer = new THREE.CanvasRenderer( { antialias: false } );
-		// renderer.setClearColor( scene.fog.color, 1 );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 
 		container.appendChild( renderer.domElement );
@@ -293,7 +310,8 @@
 		
 		stats.update();
 
-		render();
+		
+
 
 		if (isDebugCoords) {
 			$debugX.text(camera.position.x);
@@ -301,15 +319,20 @@
 			$debugZ.text(camera.position.z);
 		}
 
+		render();
+
 	}
 
 	function render() {
 		TWEEN.update();
+
+		//forces centering?
+		if(!isOrbit) {
+			camera.lookAt(scene.position);
+		}
+
 		renderer.render( scene, camera );
 
-		if(!isOrbit) {
-			camera.lookAt(0,0,0);
-		}
 	}
 
 
@@ -368,6 +391,8 @@
 
 	//animate the camera to a scene location
 	function animateCameraToScene(index) {
+		// console.log("current view is:",house.currentView);
+
 		//move mah cam to those coors
 		new TWEEN.Tween(camera.position).to( {
 			x: house.scenes[index].position.x,
@@ -391,7 +416,7 @@
 		//get me the guy we interesected / clicked
 		if ( intersects.length > 0 ) {
 			showShapeDialogue(intersects[0].object.dialogueID);
-			
+
 			//only show if not clicking the house
 			if(intersects[0].object.name != "largeCube") {
 				adjustSceneFromObject(intersects[0].object.sceneIndex);
