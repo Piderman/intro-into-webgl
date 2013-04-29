@@ -40,6 +40,11 @@
 			.camera__button__left { left: 0; }
 			.camera__button__right { right: 0; }
 
+			.camera__button__back {
+				bottom: 0;
+				left: 45%;
+			}
+
 
 			.popup {
 				position: absolute;
@@ -55,6 +60,8 @@
 			.cameraCoords {
 				position: absolute;
 				top: 0; right: 0;
+				padding: 2px 4px;
+				background: rgba(255,255,255,0.8);
 			}
 		</style>
 	</head>
@@ -65,26 +72,22 @@
 			Move the camera by clicking an object or via the "previous" and "next" buttons. 
 		</div>
 		
-		<div id="triangle" class="popup" data-sceneTrigger="triangle">
-			<h2>Triangle</h2>
+		<div id="zoom0" class="popup" data-sceneTrigger="zoom0">
+			<h2>zoom0</h2>
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut imperdiet, metus sollicitudin dictum porttitor, tellus tellus laoreet magna, sed aliquam 
 		</div>
 
-		<div id="cylinder" class="popup" data-sceneTrigger="cylinder">
-			<h2>cylinder</h2>
+		<div id="zoom1" class="popup" data-sceneTrigger="zoom1">
+			<h2>zoom1</h2>
 			Aliquam lacinia ullamcorper massa a aliquam. Praesent et ante risus, a dignissim magna. Proin faucibus lorem rhoncus risus volutpat viverra vitae a neque. Nullam sit amet sem nunc, non tempor velit. Duis mi velit, accumsan quis gravida quis, euismod eu neque.
 		</div>
-		<div id="coneGuy" class="popup" data-sceneTrigger="coneGuy">
-			<h2>coneGuy</h2>
+		<div id="zoom2" class="popup" data-sceneTrigger="zoom2">
+			<h2>zoom2</h2>
 			Quisque congue metus metus, vitae ullamcorper nulla. Aenean et tellus nec tortor sollicitudin pellentesque. Phasellus rutrum mauris ac lectus vehicula eget scelerisque dui rutrum. Suspendisse at justo diam, vel imperdiet arcu. Nunc iaculis pulvinar enim a fringilla. Mauris nec
 		</div>
-		<div id="miniCone" class="popup" data-sceneTrigger="miniCone">
-			<h2>miniCone</h2>
+		<div id="zoom3" class="popup" data-sceneTrigger="zoom3">
+			<h2>zoom3</h2>
 			Too much work. Let's burn it and say we dumped it in the sewer. Quite possible. We live long and are celebrated poopers. Then we'll go with that data file! Man, I'm sore all over. I feel like I just went ten rounds with mighty Thor. No! Don't jump! Ow, my spirit!
-		</div>
-		<div id="otherCube" class="popup" data-sceneTrigger="otherCube">
-			<h2>otherCube</h2>
-			Sed vehicula, leo eu feugiat scelerisque, sem nisl volutpat felis, volutpat suscipit nulla leo eleifend ligula. Etiam in erat ligula, sit amet sodales enim. Suspendisse potenti. Proin fermentum lectus cursus urna placerat eu tempus odio malesuada. Sed posuere, nibh ac pellentesque sollicitudin, 
 		</div>
 		<div class="cameraCoords">
 			x: <span id="cameraCoords__x"></span> | 

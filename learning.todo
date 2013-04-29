@@ -18,8 +18,11 @@ goals:
  ✔ change DOM based on current "point" @done (13-04-26 11:35)
  ✔ animate / move objects @done (13-04-26 11:35)
  ☐ cast shadow
- ☐ highlight interactive elements
- ☐ 
+ ✘ highlight interactive elements @cancelled (13-04-29 16:31)
+ ☐ minor animations in scene
+ ☐ multiple objects per view
+ ☐ get buttons working correctly
+ ☐ update interactive colors on ALL clicks
 
 
  cheatsheet:
@@ -36,7 +39,7 @@ mc naming convention:
 objectName
   geo  = geometry type
   mat = material in use
-  interactText = text that shows on click
+  dialogueID = id of html element to show
   mesh = mesh created from geo & mat
 
  name.mesh.[x].set:
