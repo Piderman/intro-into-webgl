@@ -1,7 +1,7 @@
  ✔ import  mesh @done (13-04-23 12:47)
  ✔ create a texture @done (13-04-23 16:13)
  ✔ import mesh WITH material @done (13-04-23 14:58)
- ☐ control camera with buttons?
+ ✔ control camera with buttons? @done (13-04-30 11:56)
  ☐ normal map?
  ☐ bump map?
  ☐ spec map?
@@ -20,9 +20,19 @@ goals:
  ☐ cast shadow
  ✘ highlight interactive elements @cancelled (13-04-29 16:31)
  ☐ minor animations in scene
- ☐ multiple objects per view
+ ✔ multiple objects per view @done (13-04-30 09:33)
  ☐ get buttons working correctly
- ☐ update interactive colors on ALL clicks
+ ✘ update interactive colors on ALL clicks @cancelled (13-04-30 11:49)
+ ✔ change opacity for current view's objects @done (13-04-30 11:56)
+ ✔ startup on scene 0 @done (13-04-30 09:33)
+ ✔ change camera target on zoom @done (13-04-30 11:49)
+ ☐ give kakes a file for her to update mesh.js
+ ☐ import "grouped" object
+ ✔ get kakes exporters @done (13-04-30 11:56)
+ ☐ ie webgl
+
+ fallback:
+ ☐ ie || no webgl needs static guy
 
 
  cheatsheet:

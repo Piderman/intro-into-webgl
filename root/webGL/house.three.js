@@ -1,47 +1,94 @@
 (function(){
 	//workflow to stick to: create | import geo, setup lights, render scene. Watch out for callbacks and async
 
-	var container, camera, controls, scene, renderer, stats, isOrbit = true, isDebugCoords = true,
-		house ={
+	var container, camera, controls, scene, renderer, stats, isOrbit = false, isDebugCoords = false,
+		house = {
 			"currentView" : 0, //index of camera pos arr to shoy
 			"isNormal" : true, //are we normal or zoomed out?
 			//array of zoomed in interactive positions. Theres aren't 1:1 with house rotations anymore
 			"zoomedCoords" : [
-				{
+				{//grass
 				"position" : {
 						"x" : -10.55,
 						"y" : 1.14,
 						"z" : 0.58
 					}
 				},
-				{
+				{//deck
 					"position" : {
 						"x" : -.02,
 						"y" : 2.28,
 						"z" : 12.19
 					}
 				},
-				{
+				{//side door
 					"position" : {
-						"x" : 6.84,
-						"y" : 1.88,
-						"z" : 3.28
+						"x" : 6.91,
+						"y" : 1.31,
+						"z" : 0.58
 					}
 				},
-				{
+				{ //rear roof
 					"position" : {
-						"x" : -0.09,
-						"y" : 6.11,
-						"z" : -6.76
+						"x" : 0,
+						"y" : 8.38,
+						"z" : -3.57
+					} ,
+					"target" : {
+						"x" : 0,
+						"y" : 0,
+						"z" : -2
 					}
 				},
-				{
+				{//front window
 					"position" : {
-						"x" : -7.47,
+						"x" : -7.19,
+						"y" : 1.18,
+						"z" : -1.35
+					},
+					"target" : {
+						"x" : 0,
+						"y" : 1,
+						"z" : -1
+					}
+				},
+				{//side roof
+					"position" : {
+						"x" : 5.13,
+						"y" : 5.4,
+						"z" : 5.7
+					},
+					"target" : {
+						"x" : 0,
+						"y" : -1,
+						"z" : 3
+					}
+				},
+				{//rear ground
+					"position" : {
+						"x" : 4.34,
+						"y" : 0.97,
+						"z" : -10.91
+					},
+					"target" : {
+						"x" : 3,
+						"y" : 0,
+						"z" : 0
+					}
+				},
+				{//front room
+					"position" : {
+						"x" : -7.19,
 						"y" : 2,
-						"z" : -3.88
+						"z" : 4
+					},
+					"target" : {
+						"x" : 0,
+						"y" : 1,
+						"z" : 4
 					}
 				}
+
 
 			],
 			//array of house rotation locations
@@ -77,6 +124,11 @@
 					}
 				}
 			]
+		},
+		camTarget = { //init location of target, gets updated in render()
+			"x":0,
+			"y":0,
+			"z":0
 		};
 
 
@@ -104,7 +156,7 @@
 	function init() {
 		projector = new THREE.Projector(); //needed for testing who we clicked on
 		createStats();
-		initScene(true); //startup three.js required things. pass "true" for helper objs
+		initScene(); //startup three.js required things. pass "true" for helper objs
 
 		createScenery(); //my custom objects
 
@@ -121,8 +173,8 @@
 	function generateMaterial(hexColor, isWireframe) {
 		createdMaterial = new THREE.MeshLambertMaterial({
 			color : (!hexColor) ? "#ff0" : hexColor,
-			// opacity : 0.5,
-			// transparent : true,
+			opacity : 0.6,
+			transparent : true,
 			// wireframeLinewidth : 3,
 			wireframe : (!isWireframe) ? false : true //means we can pass optional?
 		});
@@ -169,6 +221,30 @@
 			geo : importMeshFromFile("/webgl/assets/beach_house__mesh.js", "importedHouse"),
 			dialogueID : "startup"
 		},
+		ground = {
+			geo : new THREE.CubeGeometry(20, 0.1, 20), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : generateMaterial("#076e02")
+		},
+		bush = {
+			geo : new THREE.CubeGeometry(20, 0.1, 20), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : generateMaterial("#32c000")
+		}
+
+		//make mah meshes ><
+		generateMesh([
+			ground,
+			bush
+		]);
+
+		//position my guys
+		ground.mesh.position.set(0,-0.05,0);
+
+		//scenery has been made and placed, create interactive clicks!
+		// createInteractiveElements();
+		
+	}
+
+	function createInteractiveElements(){
 		//these are simply bounding boxes for interacting ja?
 		interGrass = {
 			geo : new THREE.CubeGeometry(5, 0.05, 13), //radius top, radius bottom, height, segments, height segments, open ended? 
@@ -204,6 +280,27 @@
 			dialogueID : "zoom4",
 			zoomIndex: 4,
 			rotateIndex : 0
+		},
+		interSideRoof = {
+			geo : new THREE.CubeGeometry(0.5, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : generateMaterial(),
+			dialogueID : "zoom5",
+			zoomIndex: 5,
+			rotateIndex : 2
+		},
+		interRearGround = {
+			geo : new THREE.CubeGeometry(2, 0.5, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : generateMaterial(),
+			dialogueID : "zoom6",
+			zoomIndex: 6,
+			rotateIndex : 3
+		},
+		interFrontRoom = {
+			geo : new THREE.CubeGeometry(0.2, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : generateMaterial(),
+			dialogueID : "zoom7",
+			zoomIndex: 7,
+			rotateIndex : 0
 		}
 
 
@@ -213,19 +310,27 @@
 			interDeck,
 			interSide,
 			interRoof,
-			interFrontWindow
+			interFrontWindow,
+			interSideRoof,
+			interRearGround,
+			interFrontRoom
 		]);
 
-		//position my guys
 		interGrass.mesh.position.set(-5,0,1.5);
 		interDeck.mesh.position.set(-2,1,7.5);
 		interSide.mesh.position.set(3.5,1,0.75);
 		interRoof.mesh.position.set(0,4,-3.5);
 		interFrontWindow.mesh.position.set(-3.5,1,-2);
+		interSideRoof.mesh.position.set(3,2.75,4.5);
+		interRearGround.mesh.position.set(4,0.25,-8);
+		interFrontRoom.mesh.position.set(-3.5,1,3);
+
+		//have and placed our guys, set the correct ones to active
+		setInteractiveObject();
 	}
 
 
-	//eeep callback
+	//eeep callback, does this mean scene is setup?
 	function houseCallback() {
 		theHouse.mesh.position.set(0,0,5);
 
@@ -246,7 +351,9 @@
 	//creates camera, controls and scene
 	function initScene(isHelper) {
 		camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+		
 		camera.position.set(10, 40, -10);
+		//set rotation to start and objects to start
 		moveCameraToScene(0);
 
 		if (isOrbit){
@@ -324,6 +431,7 @@
 	//three.js screen needed stuff. Caution : science dog
 	function createRenderer(){
 		renderer = new THREE.WebGLRenderer( { antialias: false } );
+		// renderer = new THREE.CanvasRenderer( { antialias: false } );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 
 		container.appendChild( renderer.domElement );
@@ -369,10 +477,12 @@
 		TWEEN.update();
 
 		//forces centering?
-		if(!isOrbit) {
-			camera.lookAt(scene.position);
-		}
+		// if(!isOrbit) {
+		// 	camera.lookAt(scene.position);
+		// }
 
+		//once tween has been updated, look at the updated (or 0 0 0) position
+		camera.lookAt(camTarget);
 		renderer.render( scene, camera );
 
 	}
@@ -399,6 +509,8 @@
 		var zoomIndex = obj.zoomIndex,
 			dialogueID = obj.dialogueID;
 		
+		house.isNormal = false;
+		
 		zoomCameraTo(zoomIndex);
 		showSceneDialogue(dialogueID);
 
@@ -415,26 +527,28 @@
 					return element;
 				}
 			});
-		console.log("set interactive to ", house.currentView);
 
 		//set all not on this view "inactive"
 		for (var i = 0; i < scene.children.length; i++) {
 			if (scene.children[i].rotateIndex != undefined) {
-				scene.children[i].material.opacity = 1;
+				scene.children[i].material.opacity = 0.3;
+				// scene.children[i].visible = false;
 			}
 		};
 		
 		//set all on this view active
 		for (var i = 0; i < currentElement.length; i++) {
-			currentElement[i].material.opacity = 0.5;
+			currentElement[i].material.opacity = 1;
+			// currentElement[i].visible = true;
 		};
 	}
 
 	//moves back and forth in linear fashion from prev/next button
 	function adjustSceneFromButton (dir) {
+		// (!event) ? console.warn("not from a click") : event.preventDefault();
+
 		//do we go forward or back?
 		(dir=="next") ? house.currentView++ : house.currentView--;
-		console.log("clicked");
 		//what about endpoints?
 		if (house.currentView < 0 ) {
 			house.currentView = house.rotateCoords.length -1 ;
@@ -449,39 +563,65 @@
 	}
 
 	//what controls do we need to display
-	function toggleCameraControls(mode){
-		$buttonBack.toggle();
-		$buttonLeft.toggle();
-		$buttonRight.toggle();
-
-		//return to zoomed out view
-		if (mode == "zoomed" ) {
-			moveCameraToScene(house.currentView);
-			showSceneDialogue(null); //does this hide them all?
-			house.isNormal = true;
+	function toggleCameraControls(){
+		//if zoomed in
+		if (house.isNormal) {
+			$buttonBack.hide();
+			$buttonLeft.show();
+			$buttonRight.show();
+		} else {
+			$buttonBack.show();
+			$buttonLeft.hide();
+			$buttonRight.hide();
 		}
+
+
+	}
+
+	function returnToRotate(){
+		moveCameraToScene(house.currentView);
+		showSceneDialogue(null); //does this hide them all?
+		house.isNormal = true;
 	}
 
 
 	//animate the camera to a scene location
 	function moveCameraToScene(index) {
-		// console.log("current view is:",house.currentView);
+		//need coords to look at. This must be a tween here so we can call "camera.lookAt(camTarget)" in render update AFTER the tween has been updated
+		camTarget = (!house.rotateCoords[index].target) ? {"x":0, "y":0, "z":0} : house.rotateCoords[index].target;
 		
+		// console.log("rotate target:",camTarget);
+
 		//move mah cam to those coords, can either be normal house rotate or zoom in
 		new TWEEN.Tween(camera.position).to( {
 			x: house.rotateCoords[index].position.x,
 			y: house.rotateCoords[index].position.y,
 			z: house.rotateCoords[index].position.z}, 500 )
 		.easing( TWEEN.Easing.Quadratic.Out).start();
+
+		new TWEEN.Tween(camTarget).to( {
+			x: camTarget.x,
+			y: camTarget.y,
+			z: camTarget.z}, 500 )
+		.easing( TWEEN.Easing.Quadratic.Out).start();
 	}
 
 	function zoomCameraTo(index) {
+		camTarget = (!house.zoomedCoords[index].target) ? {"x":0, "y":0, "z":0} : house.zoomedCoords[index].target;
+
+		// console.log("zoom target:",camTarget);
 		// console.log("current view is:",house.currentView);
 		//move mah cam to those coors
 		new TWEEN.Tween(camera.position).to( {
 			x: house.zoomedCoords[index].position.x,
 			y: house.zoomedCoords[index].position.y,
 			z: house.zoomedCoords[index].position.z}, 1000 )
+		.easing( TWEEN.Easing.Quadratic.Out).start();
+
+		new TWEEN.Tween(camTarget).to( {
+			x: camTarget.x,
+			y: camTarget.y,
+			z: camTarget.z}, 1000 )
 		.easing( TWEEN.Easing.Quadratic.Out).start();
 	}
 
@@ -505,13 +645,12 @@
 				
 				//zoom in on the guy we clicked
 				if (intersects[0].object.rotateIndex == house.currentView) {
-					// house.isNormal = false;
 					showZoomed(intersects[0].object); //will need to detect if we clicked the one we are looking at or not
-				} else {
+				} /*else {
 					console.log("clicked on an object not in this rotation")
 					house.currentView = intersects[0].object.rotateIndex; //set the rotation
 					moveCameraToScene(intersects[0].object.rotateIndex); //go to it
-				}
+				}*/
 			}
 
 		}
@@ -539,6 +678,7 @@
 		"class" : "camera__button camera__button__back",
 		"text" : "back"
 	}).appendTo($body).hide().on("click", function(){
+		returnToRotate();
 		toggleCameraControls("zoomed");
 	});
 
@@ -549,4 +689,6 @@
 				return $(this).attr("id") == id;
 		}).show();
 	}
+
+	console.log(scene);
 })();
