@@ -1,7 +1,7 @@
 (function(){
 	//workflow to stick to: create | import geo, setup lights, render scene. Watch out for callbacks and async
 
-	var container, camera, controls, scene, renderer, stats, isOrbit = false, isDebugCoords = false,
+	var container, camera, controls, scene, renderer, stats, isOrbit = true, isDebugCoords = false,
 		house = {
 			"currentView" : 0, //index of camera pos arr to shoy
 			"isNormal" : true, //are we normal or zoomed out?
@@ -172,8 +172,8 @@
 	//helper for generic material with color w wireframe toggle
 	function generateMaterial(hexColor, isWireframe) {
 		createdMaterial = new THREE.MeshLambertMaterial({
-			color : (!hexColor) ? "#ff0" : hexColor,
-			opacity : 0.6,
+			color : (!hexColor) ? "#f00" : hexColor,
+			// opacity : 0.6,
 			transparent : true,
 			// wireframeLinewidth : 3,
 			wireframe : (!isWireframe) ? false : true //means we can pass optional?
@@ -212,6 +212,29 @@
 		};
 	}
 
+	/* mc 'API'
+		each element in the scene has these props
+		obj {
+			mesh : go import me a mesh, generats the .mesh prop
+			isRecieveset
+			
+			//for interactive && hitboxes
+			rotateIndex : what rotation of the house do i belong to. Can only interact when the "view" matches
+			
+
+			//for interactive guy that needs to visually show he can be clicked
+			
+
+			//for hitbox
+			zoomIndex : in the house.zoomedCoords, what index should i use //use != undefined  as test rather than an addition bool?
+			
+			dialogueID : 
+
+		}
+
+		icons to show interactive elements 
+
+	*/
 
 	//practice making and placing various geo guys
 	function createScenery() {
@@ -223,79 +246,105 @@
 		},
 		ground = {
 			geo : new THREE.CubeGeometry(20, 0.1, 20), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : generateMaterial("#076e02")
+			mat : new THREE.MeshLambertMaterial({color: "#076e02"})
 		},
 		bush = {
-			geo : new THREE.CubeGeometry(20, 0.1, 20), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : generateMaterial("#32c000")
-		}
+			geo : new THREE.SphereGeometry(0.6,10,10), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : new THREE.MeshLambertMaterial({color: "#32c000"})
+		},
+		bush2 = {
+			geo : new THREE.SphereGeometry(0.5,10,10), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : new THREE.MeshLambertMaterial({color: "#32c000"})
+		},
+		bush3 = {
+			geo : new THREE.SphereGeometry(0.75,10,10), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : new THREE.MeshLambertMaterial({color: "#32c000"})
+		},
+		//todo: moves theses out?
+		bushIcon = {
+			geo : new THREE.CylinderGeometry(0,0.2,0.5,4, 1, false), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : new THREE.MeshLambertMaterial({color: "#fff"})
+		},
+		frontWindowIcon = {
+			geo : new THREE.SphereGeometry(0.1,2,2), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : new THREE.MeshLambertMaterial({color: "#fff"})
+		};
 
-		//make mah meshes ><
 		generateMesh([
 			ground,
-			bush
+			bush,
+			bush2,
+			bush3,
+			bushIcon,
+			frontWindowIcon
 		]);
+
 
 		//position my guys
 		ground.mesh.position.set(0,-0.05,0);
-
+		bush.mesh.position.set(-7.1,0,-1);
+		bush2.mesh.position.set(-7,0,0);
+		bush3.mesh.position.set(-6.8,0,1);
+		bushIcon.mesh.position.set(-6.8,1,0);
+		bushIcon.mesh.rotation.set(0,0, 180*(Math.PI/180));
+		frontWindowIcon.mesh.position.set(-4,1,-2);
 		//scenery has been made and placed, create interactive clicks!
-		// createInteractiveElements();
+		createHitBoxes();
 		
 	}
 
-	function createInteractiveElements(){
+	function createHitBoxes(){
 		//these are simply bounding boxes for interacting ja?
-		interGrass = {
-			geo : new THREE.CubeGeometry(5, 0.05, 13), //radius top, radius bottom, height, segments, height segments, open ended? 
+		hitboxGrass = {
+			geo : new THREE.CubeGeometry(1, 1, 3), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : generateMaterial(),
 			dialogueID : "zoom0",
 			zoomIndex: 0,
 			rotateIndex : 0
 		},
-		interDeck = {
+		hitboxDeck = {
 			geo : new THREE.CubeGeometry(2, 1.4, 1), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : generateMaterial(),
 			dialogueID : "zoom1",
 			zoomIndex: 1,
 			rotateIndex : 1
 		},
-		interSide = {
+		hitboxSide = {
 			geo : new THREE.CubeGeometry(0.05, 2, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : generateMaterial(),
 			dialogueID : "zoom2",
 			zoomIndex: 2,
 			rotateIndex : 2
 		},
-		interRoof = {
+		hitboxRoof = {
 			geo : new THREE.CubeGeometry(3, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : generateMaterial(),
 			dialogueID : "zoom3",
 			zoomIndex: 3,
 			rotateIndex : 3
 		},
-		interFrontWindow = {
+		hitboxFrontWindow = {
 			geo : new THREE.CubeGeometry(0.05, 2, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : generateMaterial(),
 			dialogueID : "zoom4",
 			zoomIndex: 4,
 			rotateIndex : 0
 		},
-		interSideRoof = {
+		hitboxSideRoof = {
 			geo : new THREE.CubeGeometry(0.5, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : generateMaterial(),
 			dialogueID : "zoom5",
 			zoomIndex: 5,
 			rotateIndex : 2
 		},
-		interRearGround = {
+		hitboxRearGround = {
 			geo : new THREE.CubeGeometry(2, 0.5, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : generateMaterial(),
 			dialogueID : "zoom6",
 			zoomIndex: 6,
 			rotateIndex : 3
 		},
-		interFrontRoom = {
+		hitboxFrontRoom = {
 			geo : new THREE.CubeGeometry(0.2, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : generateMaterial(),
 			dialogueID : "zoom7",
@@ -306,24 +355,24 @@
 
 		//make mah meshes ><
 		generateMesh([
-			interGrass,
-			interDeck,
-			interSide,
-			interRoof,
-			interFrontWindow,
-			interSideRoof,
-			interRearGround,
-			interFrontRoom
+			hitboxGrass,
+			hitboxDeck,
+			hitboxSide,
+			hitboxRoof,
+			hitboxFrontWindow,
+			hitboxSideRoof,
+			hitboxRearGround,
+			hitboxFrontRoom
 		]);
 
-		interGrass.mesh.position.set(-5,0,1.5);
-		interDeck.mesh.position.set(-2,1,7.5);
-		interSide.mesh.position.set(3.5,1,0.75);
-		interRoof.mesh.position.set(0,4,-3.5);
-		interFrontWindow.mesh.position.set(-3.5,1,-2);
-		interSideRoof.mesh.position.set(3,2.75,4.5);
-		interRearGround.mesh.position.set(4,0.25,-8);
-		interFrontRoom.mesh.position.set(-3.5,1,3);
+		hitboxGrass.mesh.position.set(-7.2,0.5,0.2);
+		hitboxDeck.mesh.position.set(-2,1,7.5);
+		hitboxSide.mesh.position.set(3.5,1,0.75);
+		hitboxRoof.mesh.position.set(0,4,-3.5);
+		hitboxFrontWindow.mesh.position.set(-3.5,1,-2);
+		hitboxSideRoof.mesh.position.set(3,2.75,4.5);
+		hitboxRearGround.mesh.position.set(4,0.25,-8);
+		hitboxFrontRoom.mesh.position.set(-3.5,1,3);
 
 		//have and placed our guys, set the correct ones to active
 		setInteractiveObject();
@@ -531,14 +580,14 @@
 		//set all not on this view "inactive"
 		for (var i = 0; i < scene.children.length; i++) {
 			if (scene.children[i].rotateIndex != undefined) {
-				scene.children[i].material.opacity = 0.3;
-				// scene.children[i].visible = false;
+				// scene.children[i].material.opacity = 0.3;
+				scene.children[i].visible = false;
 			}
 		};
 		
 		//set all on this view active
 		for (var i = 0; i < currentElement.length; i++) {
-			currentElement[i].material.opacity = 1;
+			// currentElement[i].material.opacity = 1;
 			// currentElement[i].visible = true;
 		};
 	}
