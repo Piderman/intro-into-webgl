@@ -36,6 +36,8 @@ goals:
  ☐ make icons not clickable (not get first but get first that has zoomIndex?)
  ☐ do icons need text? oO
 
+ ☐ turn on setinterobj()
+
  fallback:
  ☐ ie || no webgl needs static guy
  ☐ screenies of scene, img map for clickable imgmap (need wierd polygon?

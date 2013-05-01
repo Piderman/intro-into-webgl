@@ -1,7 +1,7 @@
 (function(){
 	//workflow to stick to: create | import geo, setup lights, render scene. Watch out for callbacks and async
 
-	var container, camera, controls, scene, renderer, stats, isOrbit = true, isDebugCoords = false,
+	var container, camera, controls, scene, renderer, stats, isOrbit = true, isDebugCoords = true,
 		house = {
 			"currentView" : 0, //index of camera pos arr to shoy
 			"isNormal" : true, //are we normal or zoomed out?
@@ -159,7 +159,7 @@
 		initScene(); //startup three.js required things. pass "true" for helper objs
 
 		createScenery(); //my custom objects
-
+		createIcons(); //my icons, starts create, placement AND animation calls
 
 		createLights();
 		
@@ -173,7 +173,7 @@
 	function generateMaterial(hexColor, isWireframe) {
 		createdMaterial = new THREE.MeshLambertMaterial({
 			color : (!hexColor) ? "#f00" : hexColor,
-			// opacity : 0.6,
+			opacity : 0.6,
 			transparent : true,
 			// wireframeLinewidth : 3,
 			wireframe : (!isWireframe) ? false : true //means we can pass optional?
@@ -250,24 +250,15 @@
 		},
 		bush = {
 			geo : new THREE.SphereGeometry(0.6,10,10), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : new THREE.MeshLambertMaterial({color: "#32c000"})
+			mat : new THREE.MeshLambertMaterial({color: "#32c000", wireframe : true})
 		},
 		bush2 = {
 			geo : new THREE.SphereGeometry(0.5,10,10), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : new THREE.MeshLambertMaterial({color: "#32c000"})
+			mat : new THREE.MeshLambertMaterial({color: "#32c000", wireframe : true})
 		},
 		bush3 = {
 			geo : new THREE.SphereGeometry(0.75,10,10), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : new THREE.MeshLambertMaterial({color: "#32c000"})
-		},
-		//todo: moves theses out?
-		bushIcon = {
-			geo : new THREE.CylinderGeometry(0,0.2,0.5,4, 1, false), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : new THREE.MeshLambertMaterial({color: "#fff"})
-		},
-		frontWindowIcon = {
-			geo : new THREE.SphereGeometry(0.1,2,2), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : new THREE.MeshLambertMaterial({color: "#fff"})
+			mat : new THREE.MeshLambertMaterial({color: "#32c000", wireframe : true})
 		};
 
 		generateMesh([
@@ -275,8 +266,6 @@
 			bush,
 			bush2,
 			bush3,
-			bushIcon,
-			frontWindowIcon
 		]);
 
 
@@ -285,68 +274,268 @@
 		bush.mesh.position.set(-7.1,0,-1);
 		bush2.mesh.position.set(-7,0,0);
 		bush3.mesh.position.set(-6.8,0,1);
-		bushIcon.mesh.position.set(-6.8,1,0);
-		bushIcon.mesh.rotation.set(0,0, 180*(Math.PI/180));
-		frontWindowIcon.mesh.position.set(-4,1,-2);
+
+
 		//scenery has been made and placed, create interactive clicks!
 		createHitBoxes();
+	}
+
+	//icons need to be separate as they are not imported meshes and need custom attrs
+	function createIcons(){
+		//associated rotate index, place in scene, ("pointing" defaults to "-y")
+		var icons = [
+			{
+				name : "bush",
+				rotateIndex : 0,
+				origin : {
+					x : -6.8,
+					y : 0,
+					z : 0
+				},
+				position : {
+					x : -6.8,
+					y : 1.5,
+					z : 0
+				}
+			},
+			{
+				name : "frontWindow",
+				rotateIndex : 0,
+				origin : {
+					x: -3,
+					y: 0,
+					z: -2
+				},
+				position : {
+					x: -4,
+					y: 3,
+					z: -2
+				},
+				pointing : "+x" // +/- x|y|z, -y default,
+			},
+			{
+				name : "frontWindow2",
+				rotateIndex : 0,
+				origin : {
+					x: -3.5,
+					y: 0,
+					z: 3
+				},
+				position : {
+					x: -3.5,
+					y: 3,
+					z: 3
+				},
+				pointing : "+x" // +/- x|y|z, -y default,
+			},
+			{
+				name : "deck",
+				rotateIndex : 1,
+				origin : {
+					x: -2,
+					y: -1,
+					z: 7.5
+				},
+				position : {
+					x: -2,
+					y: 2.5,
+					z: 7.5
+				}
+			},
+			{
+				name : "sideRoof",
+				rotateIndex : 2,
+				origin : {
+					x: -2,
+					y: -1,
+					z: 7.5
+				},
+				position : {
+					x: 3,
+					y: 3.75,
+					z: 4.5
+				}
+			},
+			{
+				name : "sideDoor",
+				rotateIndex : 2,
+				origin : {
+					x: -2,
+					y: -1,
+					z: 7.5
+				},
+				position : {
+					x: 3.5,
+					y: 3,
+					z: 0.75
+				}
+			},
+			{
+				name : "rearRoof",
+				rotateIndex : 3,
+				origin : {
+					x: -2,
+					y: -1,
+					z: 7.5
+				},
+				position : {
+					x: 0,
+					y: 5,
+					z: -3.5
+				}
+			},
+			{
+				name : "readGround",
+				rotateIndex : 3,
+				origin : {
+					x: -2,
+					y: -1,
+					z: 7.5
+				},
+				position : {
+					x: 4,
+					y: 1.5,
+					z: -8
+				}
+			}
+		]
+
+		//add the icons into the scene
+		placeIconInScene(icons);
+
+		// scene.add(bushIcon.mesh);;
+
+	}
+
+	//creates and places our icons, then calls setup animate
+	function placeIconInScene(obj){
+		var iconShape = new THREE.CylinderGeometry(0,0.2,0.5,4, 1, false),
+			iconMaterial = new THREE.MeshLambertMaterial({color: "#ff0"});
 		
+		for (var i = 0; i < obj.length; i++) {
+			var currentIcon = obj[i];
+
+			//create the icon mesh from the settings
+			currentIcon.mesh = new THREE.Mesh(iconShape, iconMaterial); //remember, .mesh is the three.js guy
+			
+			//add my custom attrs
+			currentIcon.mesh.rotateIndex = currentIcon.rotateIndex;
+			currentIcon.mesh.name = currentIcon.name + "Icon";
+			currentIcon.mesh.pointing = currentIcon.pointing;
+			currentIcon.mesh.isIcon = true; //so we can search in setInteractive()
+			
+			scene.add(currentIcon.mesh);
+
+			// place it in the origin for animation
+			currentIcon.mesh.position.set(currentIcon.origin.x, currentIcon.origin.y, currentIcon.origin.z );
+			
+
+			if (obj.pointing == "+x") {
+				currentIcon.mesh.rotation.set(0,0, 90*(Math.PI/180));
+			}
+			//otherwise pointing down
+			else if (!obj.pointing || obj.pointing == "-y"){
+				currentIcon.mesh.rotation.set(0,0, 180*(Math.PI/180));
+			}
+
+			//now call the animation of them
+			animateIcons(currentIcon);
+		};
+
+		//have and placed our guys, set the correct ones to active
+		//cache my icons
+		sceneIcons = scene.children.filter(function(element){
+			if ( element.isIcon){
+				return element;
+			}
+		});
+
+		setActiveIcon();
+	}
+
+	//using the same obj as generateIconMesh, 
+	function animateIcons(currentIcon, animationType) {
+		//being called from a loop already, so we have the current icon AND its index in the loop
+		//icon starts "hidden" in the geo from .origin. at its peak it uses .position, then drops to a lower based on .pointing
+
+		var animToPeak = new TWEEN.Tween(currentIcon.mesh.position).to( {
+				x: currentIcon.position.x,
+				y: currentIcon.position.y,
+				z: currentIcon.position.z}, 1000 )
+			.easing( TWEEN.Easing.Quadratic.InOut),
+			animToLower = new TWEEN.Tween(currentIcon.mesh.position).to( {
+				x: currentIcon.position.x,
+				y: currentIcon.position.y - 0.3,
+				z: currentIcon.position.z}, 1000 )
+			.easing( TWEEN.Easing.Quadratic.InOut);
+
+		//loop type
+		if (animationType) {
+
+		}
+		//chain for a loop
+		animToPeak.chain(animToLower);
+		animToLower.chain(animToPeak);
+
+		animToPeak.start(); //pos is initially set to origin, so start from there
 	}
 
 	function createHitBoxes(){
+		var hitboxMat = new THREE.MeshLambertMaterial({color: "#fff", wireframe : true});
+
 		//these are simply bounding boxes for interacting ja?
 		hitboxGrass = {
 			geo : new THREE.CubeGeometry(1, 1, 3), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : generateMaterial(),
+			mat : hitboxMat,
 			dialogueID : "zoom0",
 			zoomIndex: 0,
 			rotateIndex : 0
 		},
 		hitboxDeck = {
 			geo : new THREE.CubeGeometry(2, 1.4, 1), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : generateMaterial(),
+			mat : hitboxMat,
 			dialogueID : "zoom1",
 			zoomIndex: 1,
 			rotateIndex : 1
 		},
 		hitboxSide = {
 			geo : new THREE.CubeGeometry(0.05, 2, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : generateMaterial(),
+			mat : hitboxMat,
 			dialogueID : "zoom2",
 			zoomIndex: 2,
 			rotateIndex : 2
 		},
 		hitboxRoof = {
 			geo : new THREE.CubeGeometry(3, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : generateMaterial(),
+			mat : hitboxMat,
 			dialogueID : "zoom3",
 			zoomIndex: 3,
 			rotateIndex : 3
 		},
 		hitboxFrontWindow = {
 			geo : new THREE.CubeGeometry(0.05, 2, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : generateMaterial(),
+			mat : hitboxMat,
 			dialogueID : "zoom4",
 			zoomIndex: 4,
 			rotateIndex : 0
 		},
 		hitboxSideRoof = {
 			geo : new THREE.CubeGeometry(0.5, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : generateMaterial(),
+			mat : hitboxMat,
 			dialogueID : "zoom5",
 			zoomIndex: 5,
 			rotateIndex : 2
 		},
 		hitboxRearGround = {
 			geo : new THREE.CubeGeometry(2, 0.5, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : generateMaterial(),
+			mat : hitboxMat,
 			dialogueID : "zoom6",
 			zoomIndex: 6,
 			rotateIndex : 3
 		},
 		hitboxFrontRoom = {
 			geo : new THREE.CubeGeometry(0.2, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : generateMaterial(),
+			mat : hitboxMat,
 			dialogueID : "zoom7",
 			zoomIndex: 7,
 			rotateIndex : 0
@@ -373,9 +562,6 @@
 		hitboxSideRoof.mesh.position.set(3,2.75,4.5);
 		hitboxRearGround.mesh.position.set(4,0.25,-8);
 		hitboxFrontRoom.mesh.position.set(-3.5,1,3);
-
-		//have and placed our guys, set the correct ones to active
-		setInteractiveObject();
 	}
 
 
@@ -531,8 +717,17 @@
 		// }
 
 		//once tween has been updated, look at the updated (or 0 0 0) position
+		//rotate ALL mah scene icons
+		
+		for (var i = 0; i < sceneIcons.length; i++) {
+			//only rotate 90deg, then go back to 0
+			sceneIcons[i].rotation.y = (sceneIcons[i].rotation.y > 90*(Math.PI/180)) ? 0 : sceneIcons[i].rotation.y + 0.05;
+		}
+
 		camera.lookAt(camTarget);
 		renderer.render( scene, camera );
+
+
 
 	}
 
@@ -565,30 +760,51 @@
 
 		toggleCameraControls();
 
+		console.log("clicked coords",obj.position);
+		if (isDebugCoords) {
+			$debugX.text(obj.position.x);
+			$debugY.text(obj.position.y);
+			$debugZ.text(obj.position.z);
+		}
 
 	}
 
-	//obj are transparent if not in the same rotation
-	function setInteractiveObject() {
-		var currentElement = scene.children.filter(function(element, index){
+	//enable animation indicators
+	function setActiveIcon() {
+
+		var iconInView = sceneIcons.filter(function(element, index){
 				// if (element.rotateIndex && element.rotateIndex == house.currentView) { // element.rotateIndex was returning falsey, balls
-				if (element.rotateIndex == house.currentView) {
+				if (element.isIcon && element.rotateIndex == house.currentView) {
+					console.log(element);
+					return element;
+				}
+			}),
+			iconNotInView = sceneIcons.filter(function(element, index){
+				if (element.isIcon && element.rotateIndex != house.currentView) {
 					return element;
 				}
 			});
 
+		console.log("show:", iconInView, "hide:" , iconNotInView);
+
+
 		//set all not on this view "inactive"
-		for (var i = 0; i < scene.children.length; i++) {
-			if (scene.children[i].rotateIndex != undefined) {
-				// scene.children[i].material.opacity = 0.3;
-				scene.children[i].visible = false;
-			}
-		};
+		// for (var i = 0; i < scene.children.length; i++) {
+		// 	if (scene.children[i].isIcon && scene.children[i].rotateIndex != house.currentView) {
+		// 		// scene.children[i].material.opacity = 0.3;
+		// 		scene.children[i].visible = false;
+		// 	}
+		// };
 		
-		//set all on this view active
-		for (var i = 0; i < currentElement.length; i++) {
-			// currentElement[i].material.opacity = 1;
-			// currentElement[i].visible = true;
+
+		for (var i = 0; i < iconInView.length; i++) {
+			// iconInView[i].material.opacity = 1;
+			iconInView[i].visible = true;
+		};
+
+		for (var i = 0; i < iconNotInView.length; i++) {
+			// iconNotInView[i].material.opacity = 1;
+			iconNotInView[i].visible = false;
 		};
 	}
 
@@ -608,7 +824,7 @@
 		moveCameraToScene(house.currentView);
 		
 		//animate material to make it more interactive looking?
-		setInteractiveObject() //needs to also be called when clicking on an obj
+		setActiveIcon() //needs to also be called when clicking on an obj
 	}
 
 	//what controls do we need to display
@@ -739,5 +955,4 @@
 		}).show();
 	}
 
-	console.log(scene);
 })();
