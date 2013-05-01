@@ -29,19 +29,22 @@ goals:
  ☐ give kakes a file for her to update mesh.js
  ☐ import "grouped" object
  ✔ get kakes exporters @done (13-04-30 11:56)
- ☐ ie webgl
+ ✘ ie webgl @cancelled (13-05-01 15:36)
  ✔ make icon animated @done (13-05-01 13:20)
  ✔ toggle icon visiblity based on currentView @done (13-05-01 11:07)
  ✘ make icon work on walls @cancelled (13-05-01 13:42)
  icons are always above and pointing down
  ✘ make icons not clickable (not get first but get first that has zoomIndex?) @cancelled (13-05-01 13:43)
  icons aren't in way of hitboxes
- ☐ do icons need text? oO
+ ✘ do icons need text? oO @cancelled (13-05-01 14:10)
  
- ☐ consistent angles of left/right
- ☐ can we add up / down (removes left / right)
- ☐ only go up on 
+ ✔ consistent angles of left/right @done (13-05-01 14:10)
+ ✔ can we add up / down (removes left / right) @done (13-05-01 15:36)
+ ✔ only go up on a view @done (13-05-01 15:36)
  ☐ transition on zoom to show element
+ ☐ "fade" out scene?
+ ✔ callback of scene ready @done (13-05-01 16:07)
+ ☐ create moar scenery
 
  ✔ turn on setinterobj() @done (13-05-01 11:07)
 
@@ -94,3 +97,12 @@ icon:
   position = when it should anim to
   rotateIndex = what camera angle is it meant to be visible on
   isIcon = true, so we can toggle in setActiveIcon()
+
+
+  my notes:
+  - having a completely "side on" rotating camera detracts from the capabilities of the app. We should be showing off the angles and 3dness we can achieve
+
+  -"go above" shouldn't be needed as we have full control over camera location and where its looking
+
+  - each angle should show the interactive objects of that view with no need to go above the house
+
