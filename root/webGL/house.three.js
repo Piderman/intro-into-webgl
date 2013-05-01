@@ -1,7 +1,8 @@
 (function(){
 	//workflow to stick to: create | import geo, setup lights, render scene. Watch out for callbacks and async
 
-	var container, camera, controls, scene, renderer, stats, isOrbit = true, isDebugCoords = true,
+	var 
+		container, camera, controls, scene, renderer, stats, isOrbit = true, isDebugCoords = true,
 		house = {
 			"currentView" : 0, //index of camera pos arr to shoy
 			"isNormal" : true, //are we normal or zoomed out?
@@ -250,15 +251,15 @@
 		},
 		bush = {
 			geo : new THREE.SphereGeometry(0.6,10,10), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : new THREE.MeshLambertMaterial({color: "#32c000", wireframe : true})
+			mat : new THREE.MeshLambertMaterial({color: "#32c000"})
 		},
 		bush2 = {
 			geo : new THREE.SphereGeometry(0.5,10,10), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : new THREE.MeshLambertMaterial({color: "#32c000", wireframe : true})
+			mat : new THREE.MeshLambertMaterial({color: "#32c000"})
 		},
 		bush3 = {
 			geo : new THREE.SphereGeometry(0.75,10,10), //radius top, radius bottom, height, segments, height segments, open ended? 
-			mat : new THREE.MeshLambertMaterial({color: "#32c000", wireframe : true})
+			mat : new THREE.MeshLambertMaterial({color: "#32c000"})
 		};
 
 		generateMesh([
@@ -289,7 +290,7 @@
 				rotateIndex : 0,
 				origin : {
 					x : -6.8,
-					y : 0,
+					y : -1,
 					z : 0
 				},
 				position : {
@@ -302,31 +303,29 @@
 				name : "frontWindow",
 				rotateIndex : 0,
 				origin : {
-					x: -3,
-					y: 0,
+					x: -4,
+					y: -1,
 					z: -2
 				},
 				position : {
 					x: -4,
 					y: 3,
 					z: -2
-				},
-				pointing : "+x" // +/- x|y|z, -y default,
+				}
 			},
 			{
 				name : "frontWindow2",
 				rotateIndex : 0,
 				origin : {
 					x: -3.5,
-					y: 0,
+					y: -1,
 					z: 3
 				},
 				position : {
 					x: -3.5,
 					y: 3,
 					z: 3
-				},
-				pointing : "+x" // +/- x|y|z, -y default,
+				}
 			},
 			{
 				name : "deck",
@@ -346,9 +345,9 @@
 				name : "sideRoof",
 				rotateIndex : 2,
 				origin : {
-					x: -2,
+					x: 3,
 					y: -1,
-					z: 7.5
+					z: 4.5
 				},
 				position : {
 					x: 3,
@@ -360,9 +359,9 @@
 				name : "sideDoor",
 				rotateIndex : 2,
 				origin : {
-					x: -2,
+					x: 3.5,
 					y: -1,
-					z: 7.5
+					z: 0.75
 				},
 				position : {
 					x: 3.5,
@@ -374,9 +373,9 @@
 				name : "rearRoof",
 				rotateIndex : 3,
 				origin : {
-					x: -2,
+					x: 0,
 					y: -1,
-					z: 7.5
+					z: -3.5
 				},
 				position : {
 					x: 0,
@@ -388,9 +387,9 @@
 				name : "readGround",
 				rotateIndex : 3,
 				origin : {
-					x: -2,
+					x: 4,
 					y: -1,
-					z: 7.5
+					z: -8
 				},
 				position : {
 					x: 4,
@@ -423,29 +422,24 @@
 			currentIcon.mesh.name = currentIcon.name + "Icon";
 			currentIcon.mesh.pointing = currentIcon.pointing;
 			currentIcon.mesh.isIcon = true; //so we can search in setInteractive()
+			currentIcon.mesh.tweenOrigin = currentIcon.origin;
+			currentIcon.mesh.tweenPosition = currentIcon.position;
 			
 			scene.add(currentIcon.mesh);
 
 			// place it in the origin for animation
 			currentIcon.mesh.position.set(currentIcon.origin.x, currentIcon.origin.y, currentIcon.origin.z );
 			
-
-			if (obj.pointing == "+x") {
-				currentIcon.mesh.rotation.set(0,0, 90*(Math.PI/180));
-			}
-			//otherwise pointing down
-			else if (!obj.pointing || obj.pointing == "-y"){
-				currentIcon.mesh.rotation.set(0,0, 180*(Math.PI/180));
-			}
+			//make it point down
+			currentIcon.mesh.rotation.set(0,0, 180*(Math.PI/180));
 
 			//now call the animation of them
-			animateIcons(currentIcon);
+			// animateIcons(currentIcon.mesh);
 		};
 
-		//have and placed our guys, set the correct ones to active
-		//cache my icons
+		//have and placed our guys. cache my icons and set the correct ones to active
 		sceneIcons = scene.children.filter(function(element){
-			if ( element.isIcon){
+			if (element.isIcon){
 				return element;
 			}
 		});
@@ -458,26 +452,36 @@
 		//being called from a loop already, so we have the current icon AND its index in the loop
 		//icon starts "hidden" in the geo from .origin. at its peak it uses .position, then drops to a lower based on .pointing
 
-		var animToPeak = new TWEEN.Tween(currentIcon.mesh.position).to( {
-				x: currentIcon.position.x,
-				y: currentIcon.position.y,
-				z: currentIcon.position.z}, 1000 )
+		var animToPeak = new TWEEN.Tween(currentIcon.position).to( {
+				x: currentIcon.tweenPosition.x,
+				y: currentIcon.tweenPosition.y,
+				z: currentIcon.tweenPosition.z}, 1000 )
 			.easing( TWEEN.Easing.Quadratic.InOut),
-			animToLower = new TWEEN.Tween(currentIcon.mesh.position).to( {
-				x: currentIcon.position.x,
-				y: currentIcon.position.y - 0.3,
-				z: currentIcon.position.z}, 1000 )
+			
+			animToLower = new TWEEN.Tween(currentIcon.position).to( {
+				x: currentIcon.tweenPosition.x,
+				y: currentIcon.tweenPosition.y - 0.3,
+				z: currentIcon.tweenPosition.z}, 1000 )
+			.easing( TWEEN.Easing.Quadratic.InOut),
+			
+			animToOrigin = new TWEEN.Tween(currentIcon.position).to( {
+				x: currentIcon.tweenOrigin.x,
+				y: currentIcon.tweenOrigin.y,
+				z: currentIcon.tweenOrigin.z}, 500 )
 			.easing( TWEEN.Easing.Quadratic.InOut);
 
 		//loop type
-		if (animationType) {
+		if (animationType == "show") {
+			// animToPeak.chain(animToLower);
+			// animToLower.chain(animToPeak);
 
+			animToPeak.start();
+		//need to 
+		} else {
+			//stop current ones
+			TWEEN.remove([animToPeak, animToLower]);
+			animToOrigin.start();
 		}
-		//chain for a loop
-		animToPeak.chain(animToLower);
-		animToLower.chain(animToPeak);
-
-		animToPeak.start(); //pos is initially set to origin, so start from there
 	}
 
 	function createHitBoxes(){
@@ -587,9 +591,10 @@
 	function initScene(isHelper) {
 		camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
 		
-		camera.position.set(10, 40, -10);
+		// camera.position.set(-16.9, 9.23, -2.74);
+		camera.position.set(-1.19, 17.5, 0);
 		//set rotation to start and objects to start
-		moveCameraToScene(0);
+		moveCameraToScene(0, 1500);
 
 		if (isOrbit){
 			controls = new THREE.OrbitControls( camera );
@@ -760,8 +765,11 @@
 
 		toggleCameraControls();
 
-		console.log("clicked coords",obj.position);
+
 		if (isDebugCoords) {
+			//clicked on:
+			console.log(obj.position);
+
 			$debugX.text(obj.position.x);
 			$debugY.text(obj.position.y);
 			$debugZ.text(obj.position.z);
@@ -775,7 +783,6 @@
 		var iconInView = sceneIcons.filter(function(element, index){
 				// if (element.rotateIndex && element.rotateIndex == house.currentView) { // element.rotateIndex was returning falsey, balls
 				if (element.isIcon && element.rotateIndex == house.currentView) {
-					console.log(element);
 					return element;
 				}
 			}),
@@ -785,26 +792,14 @@
 				}
 			});
 
-		console.log("show:", iconInView, "hide:" , iconNotInView);
-
-
-		//set all not on this view "inactive"
-		// for (var i = 0; i < scene.children.length; i++) {
-		// 	if (scene.children[i].isIcon && scene.children[i].rotateIndex != house.currentView) {
-		// 		// scene.children[i].material.opacity = 0.3;
-		// 		scene.children[i].visible = false;
-		// 	}
-		// };
-		
-
 		for (var i = 0; i < iconInView.length; i++) {
-			// iconInView[i].material.opacity = 1;
-			iconInView[i].visible = true;
+			// iconInView[i].visible = true;
+			animateIcons(iconInView[i], "show");
 		};
 
 		for (var i = 0; i < iconNotInView.length; i++) {
-			// iconNotInView[i].material.opacity = 1;
-			iconNotInView[i].visible = false;
+			// iconNotInView[i].visible = false;
+			animateIcons(iconNotInView[i], "hide");
 		};
 	}
 
@@ -851,31 +846,30 @@
 
 
 	//animate the camera to a scene location
-	function moveCameraToScene(index) {
+	function moveCameraToScene(index, transitionSpeed) {
 		//need coords to look at. This must be a tween here so we can call "camera.lookAt(camTarget)" in render update AFTER the tween has been updated
 		camTarget = (!house.rotateCoords[index].target) ? {"x":0, "y":0, "z":0} : house.rotateCoords[index].target;
-		
-		// console.log("rotate target:",camTarget);
+
+		transitionSpeed = (transitionSpeed != undefined) ? transitionSpeed : 500 ;
+
 
 		//move mah cam to those coords, can either be normal house rotate or zoom in
 		new TWEEN.Tween(camera.position).to( {
 			x: house.rotateCoords[index].position.x,
 			y: house.rotateCoords[index].position.y,
-			z: house.rotateCoords[index].position.z}, 500 )
+			z: house.rotateCoords[index].position.z}, transitionSpeed )
 		.easing( TWEEN.Easing.Quadratic.Out).start();
 
 		new TWEEN.Tween(camTarget).to( {
 			x: camTarget.x,
 			y: camTarget.y,
-			z: camTarget.z}, 500 )
+			z: camTarget.z}, transitionSpeed )
 		.easing( TWEEN.Easing.Quadratic.Out).start();
 	}
 
 	function zoomCameraTo(index) {
 		camTarget = (!house.zoomedCoords[index].target) ? {"x":0, "y":0, "z":0} : house.zoomedCoords[index].target;
 
-		// console.log("zoom target:",camTarget);
-		// console.log("current view is:",house.currentView);
 		//move mah cam to those coors
 		new TWEEN.Tween(camera.position).to( {
 			x: house.zoomedCoords[index].position.x,
@@ -906,18 +900,9 @@
 		if ( intersects.length > 0 ) {
 
 			//click a guy and go to his zoom index ONLY when we are on the same scene, solves moving the camera through the house n stuff
-			if(intersects[0].object.name != "importedHouse") {
-				
-				//zoom in on the guy we clicked
-				if (intersects[0].object.rotateIndex == house.currentView) {
-					showZoomed(intersects[0].object); //will need to detect if we clicked the one we are looking at or not
-				} /*else {
-					console.log("clicked on an object not in this rotation")
-					house.currentView = intersects[0].object.rotateIndex; //set the rotation
-					moveCameraToScene(intersects[0].object.rotateIndex); //go to it
-				}*/
+			if(intersects[0].object.rotateIndex == house.currentView) {
+				showZoomed(intersects[0].object);
 			}
-
 		}
 	}
 

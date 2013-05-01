@@ -30,13 +30,20 @@ goals:
  ☐ import "grouped" object
  ✔ get kakes exporters @done (13-04-30 11:56)
  ☐ ie webgl
- ☐ make icon animated
- ☐ toggle icon visiblity based on currentView
- ☐ make icon work on walls
- ☐ make icons not clickable (not get first but get first that has zoomIndex?)
+ ✔ make icon animated @done (13-05-01 13:20)
+ ✔ toggle icon visiblity based on currentView @done (13-05-01 11:07)
+ ✘ make icon work on walls @cancelled (13-05-01 13:42)
+ icons are always above and pointing down
+ ✘ make icons not clickable (not get first but get first that has zoomIndex?) @cancelled (13-05-01 13:43)
+ icons aren't in way of hitboxes
  ☐ do icons need text? oO
+ 
+ ☐ consistent angles of left/right
+ ☐ can we add up / down (removes left / right)
+ ☐ only go up on 
+ ☐ transition on zoom to show element
 
- ☐ turn on setinterobj()
+ ✔ turn on setinterobj() @done (13-05-01 11:07)
 
  fallback:
  ☐ ie || no webgl needs static guy
@@ -70,5 +77,20 @@ objectName
    scenes = array
        position
            x y z
-notes:
+
+
+fn():
 invisible objects can still be clicked!
+
+
+placeIconInScene (): creates icon
+
+setActiveIcon() 
+animateIcons()
+
+
+icon:
+  origin = its coords to start in
+  position = when it should anim to
+  rotateIndex = what camera angle is it meant to be visible on
+  isIcon = true, so we can toggle in setActiveIcon()
