@@ -57,12 +57,15 @@
 				position: absolute;
 				top: 0;
 				right: 0;
-				width: 200px;
+				width: 640px;
+				min-height: 260px;
 				display: none; /* toggled by js */
 				padding: 10px 20px;
-				background: #fff;
-				background: rgba(255,255,255,0.8);
+				background: #d8d8d8;
+				text-shadow: 1px 1px 0 #fff;
 			}
+
+			#startup { display: block;}
 
 			.cameraCoords {
 				position: absolute;
@@ -71,11 +74,11 @@
 				background: rgba(255,255,255,0.8);
 			}
 
-			#container {
-				opacity: 1;
-				-webkit-transition: opacity 1.5s ease-out;
-				   -moz-transition: opacity 1.5s ease-out;
-						transition: opacity 1.5s ease-out;
+			/* faded by tweens, "locks" scene out when zoomed in thanks to z-index xD*/
+			#overlay {
+					position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+					background: -webkit-radial-gradient(50% 50%, cover, rgba(0,0,0,0.2) 30%, rgba(0,0,0,1) 110%);
+					/*background: #000; opacity: 0.8; -webkit-box-shadow: inset 0 0 100px #000;*/
 			}
 
 			/*#container.active { opacity: 0; }*/
@@ -83,44 +86,75 @@
 	</head>
 	<body id="body">
 		<div id="container"></div>
+		<div id="overlay"></div>
 		<div id="startup" class="popup" data-sceneTrigger="startup">
-			<h2>startup / largeCube</h2>
-			Move the camera by clicking an object or via the "previous" and "next" buttons. 
+			<h2>WebGL demo</h2>
+			<p>This demo showcases what we can achieve with WebGL.</p>
+			<p>The scene is made up of three main sections : rotations, scenery & interactive elements</p>
+			<p>We can "interact" with objects in the scene and move the camera via the <strong>rotate</strong> buttons.</p>
 		</div>
 
 
 		<div id="zoom0" class="popup" data-sceneTrigger="zoom0">
-			<h2>zoom0</h2>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut imperdiet, metus sollicitudin dictum porttitor, tellus tellus laoreet magna, sed aliquam 
+			<h2>Interactive objects</h2>
+			<ul>
+				<li>each object has an associated rotation and zoom coordinates</li>
+				<li>the rotation relationship means we can adjust what view the object's icon should appear and when we can click it</li>
+				<li>each objects needs an icon and a hitbox</li>
+				<li>we can have many objects per rotation</li>
+			</ul>
 		</div>
 		
 		<div id="zoom1" class="popup" data-sceneTrigger="zoom1">
-			<h2>zoom1</h2>
-			Aliquam lacinia ullamcorper massa a aliquam. Praesent et ante risus, a dignissim magna. Proin faucibus lorem rhoncus risus volutpat viverra vitae a neque. Nullam sit amet sem nunc, non tempor velit. Duis mi velit, accumsan quis gravida quis, euismod eu neque.
+			<h2>Icons</h2>
+			<p>We use to icons to show what is interactive and what isn't. The scene could be filled with many pretty 3D elements, but how do we know what is interactive?</p>
+			<p>We want to make it clear not to touch the "table" next to us, so we add a little pop-up animation between rotations to draw attention to elements in this view, as well as making the icon spin.</p>
 		</div>
 		<div id="zoom2" class="popup" data-sceneTrigger="zoom2">
-			<h2>zoom2</h2>
-			Quisque congue metus metus, vitae ullamcorper nulla. Aenean et tellus nec tortor sollicitudin pellentesque. Phasellus rutrum mauris ac lectus vehicula eget scelerisque dui rutrum. Suspendisse at justo diam, vel imperdiet arcu. Nunc iaculis pulvinar enim a fringilla. Mauris nec
+			<h2>Walls</h2>
+			<p>Walls make things rather hard. I tried making the icon point at the wall from the side, but it looked weird and caused many a headache: where is pointing, what axis does it need to rotate on, where do we animate from&hellip; and so on.</p>
+			<p>I feel we can still communicate where to click as icons are consistently just above their hitbox. In this view both icons are on the roof, but its clear they are at different heights.</p>
 		</div>
 		<div id="zoom3" class="popup" data-sceneTrigger="zoom3">
-			<h2>zoom3</h2>
-			Too much work. Let's burn it and say we dumped it in the sewer. Quite possible. We live long and are celebrated poopers. Then we'll go with that data file! Man, I'm sore all over. I feel like I just went ten rounds with mighty Thor. No! Don't jump! Ow, my spirit!
+			<h2>Transitions</h2>
+			<p>We can move anything smoothly from one position to another. We are transitioning the camera and icons from one rotation to another in the following ways:</p>
+			<ul>
+				<li>initially loading the scene</li>
+				<li>clicking the rotate buttons</li>
+				<li>clicking an object in the scene</li>
+			</ul>
 		</div>
 		<div id="zoom4" class="popup" data-sceneTrigger="zoom4">
-			<h2>zoom4</h2>
-			One hundred dollars. Perhaps, but perhaps your civilization is merely the sewer of an even greater society above you! I don't 'need' to drink. I can quit anytime I want! Interesting. No, wait, the other thing: tedious. Now what?
+			<h2>Adding angles</h2>
+			<ul>
+				<li>Additional rotation points can be added if needed</li>
+				<li>Each angle is simply a set of camera coordinates</li>
+				<li>interactive objects are linked to a "zoomIndex" which has its associated zoomed in location</li>
+				<li>The rotate buttons loop around the house for as many / little rotations as there are</li>
+				<li>interactive objects are tied to the <strong>currentView</strong> of the rotation index</li>
+			</ul>
 		</div>
 		<div id="zoom5" class="popup" data-sceneTrigger="zoom5">
-			<h2>zoom5</h2>
-			Ah, the 'Breakfast Club' soundtrack! I can't wait til I'm old enough to feel ways about stuff! This opera's as lousy as it is brilliant! Your lyrics lack subtlety. You can't just have your characters announce how they feel. That makes me feel angry! Yes, if you make it look like an electrical fire. When you do things right, people won't be sure you've done anything at all.
+			<h2>Camera and target</h2>
+			<p>We can control both the camera coordinates and where the camera is looking. In this example, we are no longer looking at the center of the house, rather to the left and down a bit.</p>
+			<p>Having access to these properties means we can make more dynamic and visually interesting angles. We can customise each side of the house to best highlight its objects and better frame their zoomed in counterparts</p>
 		</div>
 		<div id="zoom6" class="popup" data-sceneTrigger="zoom6">
-			<h2>zoom6</h2>
-			Oh yeah, good luck with that. With a warning label this big, you know they gotta be fun! Then throw her in the laundry room, which will hereafter be referred to as "the brig". And when we woke up, we had these bodies.
+			<h2>hitboxes</h2>
+			<p>We use a boring cube known as a <em>hitbox</em> to register where the user has clicked. This <em>hitbox</em> is inivisble and is created in code.</p>
+			<p>We make these hitboxes rather generous so user's don't need to be so precise with their clicks. </p>
 		</div>
 		<div id="zoom7" class="popup" data-sceneTrigger="zoom7">
-			<h2>zoom7</h2>
-			Fatal. And so we say goodbye to our beloved pet, Nibbler, who's gone to a place where I, too, hope one day to go. The toilet. Oh right. I forgot about the battle.
+			<h2>Scenery</h2>
+			<ul>
+				<li>scenery is imported from a 3D model and then placed where we need it</li>
+				<li>for this example we are using primitive objects like spheres, cubes and cylinders</li>
+				<li>scenery is agnostic to the current rotation</li>
+			</ul>
+		</div>
+		<div id="zoom8" class="popup" data-sceneTrigger="zoom8">
+			<h2>Enhance...enhance</h2>
+			<p>Zooming in will fade in an image of the interior or what ever we need to show. Each interactive element has corresponding <code>HTML</code> information to show, we can make it anything we want.</p>
 		</div>
 
 

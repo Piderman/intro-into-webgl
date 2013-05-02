@@ -1,8 +1,62 @@
 (function(){
 	//workflow to stick to: create | import geo, setup lights, render scene. Watch out for callbacks and async
 
-	var 
-		container, camera, controls, scene, renderer, stats, isOrbit = false, isDebugCoords = false,
+//dom stuff first b4 3d is loaded
+	var $body = $("#body");
+
+	$overlay = $("#overlay").fadeOut();//for fading /disabling scene
+
+	$buttonLeft = $("<button>", {
+		"class" : "camera__button camera__button__left",
+		text : "rotate left"
+	}).on("click", function(){
+		adjustSceneFromButton("prev");
+	}).appendTo($body).hide();
+
+	$buttonRight = $("<button>", {
+		"class" : "camera__button camera__button__right",
+		text : "rotate right"
+	}).on("click", function(){
+		adjustSceneFromButton("next");
+	}).appendTo($body).hide();
+
+	//move camera ABOVE, dont want to affect the currentView though
+	$buttonUp = $("<button>",{
+		"class" : "camera__button camera__button__up",
+		text : "rotate topwise "
+	}).on("click", function(){
+		$buttonUp.hide();
+		$buttonLeft.hide();
+		$buttonRight.hide();
+		$buttonDown.show();
+
+		aboveCameraTo(house.currentView);
+	}).appendTo($body).hide();
+	
+	$buttonDown = $("<button>",{
+		"class" : "camera__button camera__button__down",
+		text : "return to side"
+	}).on("click", function(){
+		//need to make a up/down logic guy
+		$buttonDown.hide();
+		$buttonUp.show();
+
+		toggleCameraControls();
+		moveCameraToScene(house.currentView);
+	}).appendTo($body).hide();
+
+	$buttonBack = $("<button>", {
+		"class" : "camera__button camera__button__back",
+		"text" : "back"
+	}).appendTo($body).hide().on("click", function(){
+		returnToRotate();
+		toggleCameraControls("zoomed");
+		zoomedOutComplete();
+	});
+
+	$container = $("#container");
+
+	var container, camera, controls, scene, renderer, stats, isOrbit = false, isDebugCoords = false, isSideOn = false,
 		house = {
 			"currentView" : 0, //index of camera pos arr to shoy
 			"isNormal" : true, //are we normal or zoomed out?
@@ -17,9 +71,14 @@
 				},
 				{//deck
 					"position" : {
-						"x" : -.02,
-						"y" : 2.28,
-						"z" : 12.19
+						"x" : -3.03,
+						"y" : 1.26,
+						"z" : 10.11
+					},
+					"target" : {
+						"x" : 2,
+						"y" : 1,
+						"z" : 0
 					}
 				},
 				{//side door
@@ -88,6 +147,18 @@
 						"y" : 1,
 						"z" : 4
 					}
+				},
+				{//rear door
+					"position" : {
+						"x" : -3.24,
+						"y" : 1.77,
+						"z" : -6.89
+					},
+					"target" : {
+						"x" : -3,
+						"y" : 0,
+						"z" : 0
+					}
 				}
 
 
@@ -96,33 +167,33 @@
 			"rotateCoords" : [
 				{
 					"position" : {
-						"x" : -12.96,
-						"y" : 3.56,
-						"z" : 0
+						"x" : (isSideOn) ? -12.96 : -12.24,
+						"y" : (isSideOn) ? 3.56 : 3.23,
+						"z" : (isSideOn) ? 0 : 3.13
 					}
 				},
 				{
 					"position" : {
-						"x" : 0,
-						"y" : 3.56,
-						"z" : 12.96
+						"x" :(isSideOn) ? 0 : -0.2,
+						"y" :(isSideOn) ? 3.56 : 2.28,
+						"z" :(isSideOn) ? 12.96 : 12.19
 					}
 					
 				},
 				{
 					"position" : {
-						"x" : 12.96,
-						"y" : 3.56,
-						"z" : 0
+						"x" :(isSideOn) ? 12.96 : 11.41,
+						"y" :(isSideOn) ? 3.56 : 3.47,
+						"z" :(isSideOn) ? 0 : 4.47
 					},
 					"aboveIndex" : 0 // link w above
 					
 				},
 				{
 					"position" : {
-						"x" : 0,
-						"y" : 3.56,
-						"z" : -12.96
+						"x" :(isSideOn) ? 0 : 0.29,
+						"y" :(isSideOn) ? 3.56 : 11.63,
+						"z" :(isSideOn) ? -12.96 : -13.41
 					}
 				}
 			],
@@ -347,7 +418,7 @@
 			},
 			{
 				name : "sideRoofSomething",
-				geo : new THREE.CubeGeometry(0.75,1,0.75), //radius top, radius bottom, height, segments, height segments, open ended? 
+				geo : new THREE.CubeGeometry(0.5,1,0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
 				mat : new THREE.MeshLambertMaterial({color: "#e7713e"}),
 				position: {
 					"x": 3,
@@ -366,22 +437,12 @@
 				}
 			},
 			{
-				name : "rearRoof1",
-				geo : new THREE.CubeGeometry(0.5,1,1), //radius top, radius bottom, height, segments, height segments, open ended? 
-				mat : new THREE.MeshLambertMaterial({color: "#b3b3b5"}),
-				position: {
-					"x": -1,
-					"y": 4,
-					"z": -3.2
-				}
-			},
-			{
-				name : "rearRoof2",
-				geo : new THREE.CubeGeometry(2,0.5,0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
+				name : "rearRoof",
+				geo : new THREE.CubeGeometry(1.5,0.8,0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
 				mat : new THREE.MeshLambertMaterial({color: "#b3b3b5"}),
 				position: {
 					"x": 0,
-					"y": 4,
+					"y": 3.8,
 					"z": -3.5
 				}
 			}
@@ -475,7 +536,7 @@
 					z: 4.5
 				}
 			},
-			{
+			/*{//for demo only
 				name : "sideDoor",
 				rotateIndex : 2,
 				origin : {
@@ -488,13 +549,13 @@
 					y: 3,
 					z: 0.75
 				}
-			},
+			},*/
 			{
 				name : "rearRoof",
 				rotateIndex : 3,
 				origin : {
 					x: 0,
-					y: 2.5,
+					y: 0,
 					z: -3
 				},
 				position : {
@@ -516,6 +577,40 @@
 					y: 1.5,
 					z: -8
 				}
+			},
+			{
+				name : "readDoor",
+				rotateIndex : 3,
+				origin : {
+					x: -2.5,
+					y: 0,
+					z: -4
+				},
+				position : {
+					x: -2.5,
+					y: 3,
+					z: -4
+				}
+			},
+			{//only for demo
+				name : "sideDoorEg",
+				rotateIndex : 2,
+				origin : {
+					x: -1,
+					y: 1,
+					z: 0.75
+				},
+				position : {
+					x: 4.5,
+					y: 1,
+					z: 0.75
+				},
+				rotation: {
+					x: 0,
+					y: 0,
+					z: 90*(Math.PI/180)
+				},
+				isDemo : true
 			}
 		]
 
@@ -537,13 +632,14 @@
 			//create the icon mesh from the settings
 			currentIcon.mesh = new THREE.Mesh(iconShape, iconMaterial); //remember, .mesh is the three.js guy
 			
-			//add my custom attrs
+			// add my custom attrs, better way to extend this?
 			currentIcon.mesh.rotateIndex = currentIcon.rotateIndex;
 			currentIcon.mesh.name = currentIcon.name + "Icon";
 			currentIcon.mesh.pointing = currentIcon.pointing;
 			currentIcon.mesh.isIcon = true; //so we can search in setInteractive()
 			currentIcon.mesh.tweenOrigin = currentIcon.origin;
 			currentIcon.mesh.tweenPosition = currentIcon.position;
+			currentIcon.mesh.isDemo = currentIcon.isDemo; //only for demo
 			
 			scene.add(currentIcon.mesh);
 
@@ -553,7 +649,14 @@
 			//make it point down
 			currentIcon.mesh.rotation.set(0,0, 180*(Math.PI/180));
 
-			//now call the animation of them
+			//override, use only for side door demp
+			if (currentIcon.rotation) {
+				currentIcon.mesh.rotation.set(currentIcon.rotation.x, currentIcon.rotation.y, currentIcon.rotation.z);
+			}
+
+
+
+			//now call the animation of them, EDIT: removed, called on moving scene to rotation number so we can animate up/down per view
 			// animateIcons(currentIcon.mesh);
 		};
 
@@ -603,7 +706,7 @@
 	}
 
 	function createHitBoxes(){
-		var hitboxMat = new THREE.MeshLambertMaterial({color: "#fff", transparent : true, opacity : 0.5});
+		var hitboxMat = new THREE.MeshLambertMaterial({color: "#f00", wireframe : true});
 
 		//these are simply bounding boxes for interacting ja?
 		hitboxGrass = {
@@ -628,7 +731,7 @@
 			rotateIndex : 2
 		},
 		hitboxRoof = {
-			geo : new THREE.CubeGeometry(3, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
+			geo : new THREE.CubeGeometry(2, 1, 1), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom3",
 			zoomIndex: 3,
@@ -642,25 +745,32 @@
 			rotateIndex : 0
 		},
 		hitboxSideRoof = {
-			geo : new THREE.CubeGeometry(0.5, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
+			geo : new THREE.CubeGeometry(0.8, 0.8, 0.8), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom5",
 			zoomIndex: 5,
 			rotateIndex : 2
 		},
 		hitboxRearGround = {
-			geo : new THREE.CubeGeometry(2, 0.5, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
+			geo : new THREE.CubeGeometry(2.2, 0.6, 2.2), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom6",
 			zoomIndex: 6,
 			rotateIndex : 3
 		},
 		hitboxFrontRoom = {
-			geo : new THREE.CubeGeometry(0.2, 0.5, 0.5), //radius top, radius bottom, height, segments, height segments, open ended? 
+			geo : new THREE.CubeGeometry(0.2, 2, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom7",
 			zoomIndex: 7,
 			rotateIndex : 0
+		},
+		hitboxRearDoor = {
+			geo : new THREE.CubeGeometry(2, 2, 0.2), //radius top, radius bottom, height, segments, height segments, open ended? 
+			mat : hitboxMat,
+			dialogueID : "zoom8",
+			zoomIndex: 8,
+			rotateIndex : 3
 		}
 
 
@@ -673,17 +783,19 @@
 			hitboxFrontWindow,
 			hitboxSideRoof,
 			hitboxRearGround,
-			hitboxFrontRoom
+			hitboxFrontRoom,
+			hitboxRearDoor
 		]);
 
 		hitboxGrass.mesh.position.set(-7.2,0.5,0.2);
 		hitboxDeck.mesh.position.set(-2,1,7.5);
 		hitboxSide.mesh.position.set(3.5,1,0.75);
-		hitboxRoof.mesh.position.set(0,4,-3.5);
+		hitboxRoof.mesh.position.set(0,3.8,-3.5);
 		hitboxFrontWindow.mesh.position.set(-3.5,1,-2);
-		hitboxSideRoof.mesh.position.set(3,2.75,4.5);
-		hitboxRearGround.mesh.position.set(4,0.25,-8);
+		hitboxSideRoof.mesh.position.set(3,2.88,4.5);
+		hitboxRearGround.mesh.position.set(4,0.25,-7.9);
 		hitboxFrontRoom.mesh.position.set(-3.5,1,3);
+		hitboxRearDoor.mesh.position.set(-2.5,1,-4);
 
 		if (!isDebugCoords){
 			hitboxGrass.mesh.visible = false;
@@ -692,8 +804,9 @@
 			hitboxRoof.mesh.visible = false;
 			hitboxFrontWindow.mesh.visible = false;
 			hitboxSideRoof.mesh.visible = false;
-			hitboxRearGround.mesh.visible = false;
+			// hitboxRearGround.mesh.visible = false; //want to show this for the demo
 			hitboxFrontRoom.mesh.visible = false;
+			hitboxRearDoor.mesh.visible = false;
 		}
 	}
 
@@ -854,8 +967,13 @@
 		//rotate ALL mah scene icons
 		
 		for (var i = 0; i < sceneIcons.length; i++) {
+			//only for demo, remove the if and only use y rotation
 			//only rotate 90deg, then go back to 0
-			sceneIcons[i].rotation.y = (sceneIcons[i].rotation.y > 90*(Math.PI/180)) ? 0 : sceneIcons[i].rotation.y + 0.05;
+			if (!sceneIcons[i].isDemo) {
+				sceneIcons[i].rotation.y = (sceneIcons[i].rotation.y > 90*(Math.PI/180)) ? 0 : sceneIcons[i].rotation.y + 0.05;
+			} else {
+				sceneIcons[i].rotation.x = (sceneIcons[i].rotation.x > 90*(Math.PI/180)) ? 0 : sceneIcons[i].rotation.x + 0.05;
+			}
 		}
 
 		camera.lookAt(camTarget);
@@ -929,6 +1047,7 @@
 		for (var i = 0; i < iconNotInView.length; i++) {
 			// iconNotInView[i].visible = false;
 			animateIcons(iconNotInView[i], "hide");
+
 		};
 	}
 
@@ -1017,7 +1136,9 @@
 			x: house.zoomedCoords[index].position.x,
 			y: house.zoomedCoords[index].position.y,
 			z: house.zoomedCoords[index].position.z}, 1000 )
-		.easing( TWEEN.Easing.Quadratic.Out).start();
+		.easing( TWEEN.Easing.Quadratic.Out).start().onComplete(function(){
+			zoomedInComplete();
+		});
 
 		new TWEEN.Tween(camTarget).to( {
 			x: camTarget.x,
@@ -1077,57 +1198,35 @@
 	}
 
 
+	//zoomed in / out states, called after tweens
+
+	function zoomedInComplete(){
+		$overlay.fadeIn();
+		return;
+
+		console.log(scene.children);
+		var sceneLights = scene.children.filter( function(element){
+			if (element.intensity != undefined) return element;
+		});
+
+		for (var i = 0; i < sceneLights.length; i++) {
+			sceneLights[i].color.set(0,0,0);
+		};
+		// sceneLights.color.set(0,0,0);
+		// tweenLights =  new TWEEN.Tween(camTarget).to( {
+		// 	x: camTarget.x,
+		// 	y: camTarget.y,
+		// 	z: camTarget.z}, 500 )
+		// .easing( TWEEN.Easing.Quadratic.Out).start();
+	}
+
+	//note: not actually coming from a tween rather the click of "back"
+	function zoomedOutComplete() {
+		$overlay.fadeOut();
+	}
+
 	//todo: clean up
-	var $body = $("#body");
-
-	$buttonLeft = $("<button>", {
-		"class" : "camera__button camera__button__left",
-		text : "rotate left"
-	}).on("click", function(){
-		adjustSceneFromButton("prev");
-	}).appendTo($body).hide();
-
-	$buttonRight = $("<button>", {
-		"class" : "camera__button camera__button__right",
-		text : "rotate right"
-	}).on("click", function(){
-		adjustSceneFromButton("next");
-	}).appendTo($body).hide();
-
-	//move camera ABOVE, dont want to affect the currentView though
-	$buttonUp = $("<button>",{
-		"class" : "camera__button camera__button__up",
-		text : "rotate topwise "
-	}).on("click", function(){
-		$buttonUp.hide();
-		$buttonLeft.hide();
-		$buttonRight.hide();
-		$buttonDown.show();
-
-		aboveCameraTo(house.currentView);
-	}).appendTo($body).hide();
 	
-	$buttonDown = $("<button>",{
-		"class" : "camera__button camera__button__down",
-		text : "return to side"
-	}).on("click", function(){
-		//need to make a up/down logic guy
-		$buttonDown.hide();
-		$buttonUp.show();
-
-		toggleCameraControls();
-		moveCameraToScene(house.currentView);
-	}).appendTo($body).hide();
-
-	$buttonBack = $("<button>", {
-		"class" : "camera__button camera__button__back",
-		"text" : "back"
-	}).appendTo($body).hide().on("click", function(){
-		returnToRotate();
-		toggleCameraControls("zoomed");
-	});
-
-	$container = $("#container");
 
 	//show the current shape's HTML
 	function showSceneDialogue (id) {

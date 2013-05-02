@@ -43,8 +43,9 @@ goals:
  ✔ only go up on a view @done (13-05-01 15:36)
  ☐ transition on zoom to show element
  ☐ "fade" out scene?
+ ☐ look at custom attrs
  ✔ callback of scene ready @done (13-05-01 16:07)
- ☐ create moar scenery
+ ✔ create moar scenery @done (13-05-02 10:21)
 
  ✔ turn on setinterobj() @done (13-05-01 11:07)
 
