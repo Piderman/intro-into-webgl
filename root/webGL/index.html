@@ -83,6 +83,7 @@
 
 			/*#container.active { opacity: 0; }*/
 		</style>
+	<script src="/libs/modernizr.custom.81962.js"></script>
 	</head>
 	<body id="body">
 		<div id="container"></div>
@@ -168,17 +169,12 @@
 
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		<script type="text/javascript">
-			Modernizr.load{
-				test : Modernizr.WebGL,
-				nope: "house--nowebgl.js",
-				yep: ["/libs/three.min.js", "/libs/controls/OrbitControls.js", "/libs/tween.min.js", "/libs/stats.min.js","house.three.js"]
-			}
+			Modernizr.load( {
+				test : Modernizr.webgl,
+				yep: "house--nowebgl.js",
+				// yep: ["/libs/three.min.js", "/libs/controls/OrbitControls.js", "/libs/tween.min.js", "/libs/stats.min.js","house.three.js"]
+			});
 		</script>
-		<script src="/libs/three.min.js"></script>
-		<script src="/libs/controls/OrbitControls.js"></script>
-		<script src="/libs/tween.min.js"></script>
-		<script src="/libs/stats.min.js"></script>
-		<script src="house.three.js"></script>
 
 		<footer><small>house mesh from <a href="http://www.sharecg.com/pf/full_uploads.php?pf_user_name=matesmi">matesmi</a>. http://www.sharecg.com/v/14941/3d-model/Beach-House</small></footer>
 	</body>
