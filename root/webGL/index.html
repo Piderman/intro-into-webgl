@@ -155,6 +155,8 @@
 		<div id="zoom8" class="popup" data-sceneTrigger="zoom8">
 			<h2>Enhance...enhance</h2>
 			<p>Zooming in will fade in an image of the interior or what ever we need to show. Each interactive element has corresponding <code>HTML</code> information to show, we can make it anything we want.</p>
+
+			<p>I added some hover states and little animation, but it all seems to be too much as the framerate drops significantly. #sadface </p>
 		</div>
 
 
@@ -164,12 +166,18 @@
 			z: <span id="cameraCoords__z"></span>
 		</div>
 
-
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script type="text/javascript">
+			Modernizr.load{
+				test : Modernizr.WebGL,
+				nope: "house--nowebgl.js",
+				yep: ["/libs/three.min.js", "/libs/controls/OrbitControls.js", "/libs/tween.min.js", "/libs/stats.min.js","house.three.js"]
+			}
+		</script>
 		<script src="/libs/three.min.js"></script>
-		<script src="/libs/controls/OrbitControls.js"></script> <!-- todo: remove? -->
+		<script src="/libs/controls/OrbitControls.js"></script>
 		<script src="/libs/tween.min.js"></script>
 		<script src="/libs/stats.min.js"></script>
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		<script src="house.three.js"></script>
 
 		<footer><small>house mesh from <a href="http://www.sharecg.com/pf/full_uploads.php?pf_user_name=matesmi">matesmi</a>. http://www.sharecg.com/v/14941/3d-model/Beach-House</small></footer>

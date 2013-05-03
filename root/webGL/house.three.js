@@ -56,7 +56,7 @@
 
 	$container = $("#container");
 
-	var container, camera, controls, scene, renderer, stats, isOrbit = false, isDebugCoords = false, isSideOn = false,
+	var container, camera, controls, scene, renderer, stats, isOrbit = false, isDebugCoords = false, isSideOn = false, mouse = new THREE.Vector2(),
 		house = {
 			"currentView" : 0, //index of camera pos arr to shoy
 			"isNormal" : true, //are we normal or zoomed out?
@@ -291,6 +291,8 @@
 			current.mesh.zoomIndex = current.zoomIndex; //[4]
 			current.mesh.rotateIndex = current.rotateIndex; //[4]
 			current.mesh.name = current.name; //[4]
+			if (current.iconIndex !=undefined) current.mesh.iconIndex = current.iconIndex;
+
 			
 			scene.add(current.mesh);
 
@@ -445,18 +447,64 @@
 					"y": 3.8,
 					"z": -3.5
 				}
+			},
+			{
+				name : "bird1",
+				geo : new THREE.CubeGeometry(0.25,0.25,0.25), //radius top, radius bottom, height, segments, height segments, open ended? 
+				mat : new THREE.MeshLambertMaterial({color: "#d813d6"}),
+				position: { //fly in from off screen to then be tweened
+					"x": 0,
+					"y": 10,
+					"z": -2
+				}
 			}
 
 		];
 		generateMesh(meshScenery);
 
+		animateBird();
 
-		//position my guys
-		// ground.mesh.position.set(0,-0.05,0);
-		// bush.mesh.position.set(-7.1,0,-1);
-		// bush2.mesh.position.set(-7,0,0);
-		// bush3.mesh.position.set(-6.8,0,1);
+		//todo : move out
+		function animateBird(){
+			var theBird = scene.children.filter( function(element){
+					return element.name == "bird1";
+				}),
+				theBird = theBird[0], //need a ref of the bird, get him out an array
 
+				keyFlyToRoof = new TWEEN.Tween(theBird.position).to( {
+					x: -4.2,
+					y: 4.6,
+					z: -2.1}, 2000 )
+				.easing( TWEEN.Easing.Quadratic.InOut).delay(1000),
+				
+				
+				keyFlyToPool = new TWEEN.Tween(theBird.position).to( {
+					x: 2,
+					y: 0.1,
+					z: -6}, 1500 )
+				.easing( TWEEN.Easing.Quadratic.InOut).delay(2000),
+				
+				keyFlyToLargeBush = new TWEEN.Tween(theBird.position).to( {
+					x: -7,
+					y: 1.2,
+					z: -3.9}, 2500 )
+				.easing( TWEEN.Easing.Quadratic.InOut).delay(1500),
+
+				keyFlyToSmallBush = new TWEEN.Tween(theBird.position).to( {
+					x: -5,
+					y: 0.6,
+					z: 5}, 2000 )
+				.easing( TWEEN.Easing.Quadratic.InOut).delay(2250);
+
+				keyFlyToRoof.chain(keyFlyToPool);
+				keyFlyToPool.chain(keyFlyToLargeBush);
+				keyFlyToLargeBush.chain(keyFlyToSmallBush);
+				keyFlyToSmallBush.chain(keyFlyToRoof);
+
+
+				keyFlyToRoof.start();
+
+		}
 
 		//scenery has been made and placed, create interactive clicks!
 		createHitBoxes();
@@ -630,7 +678,7 @@
 			var currentIcon = obj[i];
 
 			//create the icon mesh from the settings
-			currentIcon.mesh = new THREE.Mesh(iconShape, iconMaterial); //remember, .mesh is the three.js guy
+			currentIcon.mesh = new THREE.Mesh(iconShape, new THREE.MeshLambertMaterial({color: "#ff0"})); //have to use a new instance as changing the color takes place on mat level, not per item level
 			
 			// add my custom attrs, better way to extend this?
 			currentIcon.mesh.rotateIndex = currentIcon.rotateIndex;
@@ -714,63 +762,73 @@
 			mat : hitboxMat,
 			dialogueID : "zoom0",
 			zoomIndex: 0,
-			rotateIndex : 0
+			rotateIndex : 0,
+			iconIndex : 0
 		},
 		hitboxDeck = {
 			geo : new THREE.CubeGeometry(2, 1.4, 1), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom1",
 			zoomIndex: 1,
-			rotateIndex : 1
+			rotateIndex : 1,
+			iconIndex : 4,
+			iconIndex : 3
 		},
 		hitboxSide = {
 			geo : new THREE.CubeGeometry(0.05, 2, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom2",
 			zoomIndex: 2,
-			rotateIndex : 2
+			rotateIndex : 2,
+			iconIndex : 8
 		},
 		hitboxRoof = {
 			geo : new THREE.CubeGeometry(2, 1, 1), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom3",
 			zoomIndex: 3,
-			rotateIndex : 3
+			rotateIndex : 3,
+			iconIndex : 5
 		},
 		hitboxFrontWindow = {
 			geo : new THREE.CubeGeometry(0.05, 2, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom4",
 			zoomIndex: 4,
-			rotateIndex : 0
+			rotateIndex : 0,
+			iconIndex: 1
 		},
 		hitboxSideRoof = {
 			geo : new THREE.CubeGeometry(0.8, 0.8, 0.8), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom5",
 			zoomIndex: 5,
-			rotateIndex : 2
+			rotateIndex : 2,
+			iconIndex : 4
 		},
 		hitboxRearGround = {
 			geo : new THREE.CubeGeometry(2.2, 0.6, 2.2), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom6",
 			zoomIndex: 6,
-			rotateIndex : 3
+			rotateIndex : 3,
+			iconIndex : 6
 		},
 		hitboxFrontRoom = {
 			geo : new THREE.CubeGeometry(0.2, 2, 2), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom7",
 			zoomIndex: 7,
-			rotateIndex : 0
+			rotateIndex : 0,
+			iconIndex : 2
 		},
 		hitboxRearDoor = {
 			geo : new THREE.CubeGeometry(2, 2, 0.2), //radius top, radius bottom, height, segments, height segments, open ended? 
 			mat : hitboxMat,
 			dialogueID : "zoom8",
 			zoomIndex: 8,
-			rotateIndex : 3
+			rotateIndex : 3,
+			iconIndex : 7
 		}
 
 
@@ -808,6 +866,11 @@
 			hitboxFrontRoom.mesh.visible = false;
 			hitboxRearDoor.mesh.visible = false;
 		}
+
+		sceneHitboxes = scene.children.filter(function(element, index){
+			if (element.dialogueID != undefined) return element;
+		});
+		
 	}
 
 
@@ -901,11 +964,20 @@
 		});
 	}
 
-
+	//who did i click
 	$("#container").on("click", function(event){
 		detectClickedObj(event);
 	});
 
+	//who i am hovering
+	$("#container").on("mousemove", function(event){
+		event.preventDefault(); //needed?
+
+		// mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		// mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+		
+		detectHoveredObj(event);	
+	});
 
 	
 	//----------------------------------------------------------------------------
@@ -976,16 +1048,13 @@
 			}
 		}
 
+
 		camera.lookAt(camTarget);
 		renderer.render( scene, camera );
 
 
 
 	}
-
-
-
-
 
 	//----------------------------------------------------------------------------
 	
@@ -1185,7 +1254,7 @@
 
 		raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
 
-		var intersects = raycaster.intersectObjects( scene.children );
+		var intersects = raycaster.intersectObjects( sceneHitboxes ); //was scene children, better to strictly look for hitboxes
 
 		//get me the guy we interesected / clicked
 		if ( intersects.length > 0 ) {
@@ -1197,27 +1266,38 @@
 		}
 	}
 
+	function detectHoveredObj(event) {
+		var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+		
+		projector.unprojectVector( vector, camera );
+
+		raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+		var intersects = raycaster.intersectObjects( sceneHitboxes );
+
+		//set all off first
+		for (var i = 0; i < sceneIcons.length; i++) {
+			sceneIcons[i].material.color.set("#ff0"); // off
+		};
+
+		//get me the guy we interesected / clicked
+		if ( intersects.length > 0 ) {
+			if (intersects[0].object.rotateIndex != house.currentView) return;
+			
+			
+
+			if (intersects[0].object.iconIndex !=undefined) {
+				//i have hovered over someone who does have an icon, change my icon color
+				var associatedIcon = intersects[0].object.iconIndex;
+				sceneIcons[associatedIcon].material.color.set("#f00"); //can we swap the materials of the current icon then?
+			}
+		}
+	}
+
 
 	//zoomed in / out states, called after tweens
-
 	function zoomedInComplete(){
 		$overlay.fadeIn();
-		return;
-
-		console.log(scene.children);
-		var sceneLights = scene.children.filter( function(element){
-			if (element.intensity != undefined) return element;
-		});
-
-		for (var i = 0; i < sceneLights.length; i++) {
-			sceneLights[i].color.set(0,0,0);
-		};
-		// sceneLights.color.set(0,0,0);
-		// tweenLights =  new TWEEN.Tween(camTarget).to( {
-		// 	x: camTarget.x,
-		// 	y: camTarget.y,
-		// 	z: camTarget.z}, 500 )
-		// .easing( TWEEN.Easing.Quadratic.Out).start();
 	}
 
 	//note: not actually coming from a tween rather the click of "back"
@@ -1225,17 +1305,14 @@
 		$overlay.fadeOut();
 	}
 
-	//todo: clean up
 	
 
 	//show the current shape's HTML
 	function showSceneDialogue (id) {
-		$("div.popup").hide()
-			.filter( function(){
-				return $(this).attr("id") == id;
+		$("div.popup").hide() //hide all
+			.filter( function() {
+				return $(this).attr("id") == id; //filtered to only the current one to then show
 		}).show();
-
-		$container.toggleClass("active");
 	}
 
 })();

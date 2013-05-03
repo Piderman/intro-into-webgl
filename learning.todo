@@ -19,14 +19,14 @@ goals:
  ✔ animate / move objects @done (13-04-26 11:35)
  ☐ cast shadow
  ✘ highlight interactive elements @cancelled (13-04-29 16:31)
- ☐ minor animations in scene
+ ✔ minor animations in scene @done (13-05-03 11:42)
  ✔ multiple objects per view @done (13-04-30 09:33)
  ☐ get buttons working correctly
  ✘ update interactive colors on ALL clicks @cancelled (13-04-30 11:49)
  ✔ change opacity for current view's objects @done (13-04-30 11:56)
  ✔ startup on scene 0 @done (13-04-30 09:33)
  ✔ change camera target on zoom @done (13-04-30 11:49)
- ☐ give kakes a file for her to update mesh.js
+ ✘ give kakes a file for her to update mesh.js @cancelled (13-05-03 11:46)
  ☐ import "grouped" object
  ✔ get kakes exporters @done (13-04-30 11:56)
  ✘ ie webgl @cancelled (13-05-01 15:36)
@@ -41,11 +41,12 @@ goals:
  ✔ consistent angles of left/right @done (13-05-01 14:10)
  ✔ can we add up / down (removes left / right) @done (13-05-01 15:36)
  ✔ only go up on a view @done (13-05-01 15:36)
- ☐ transition on zoom to show element
- ☐ "fade" out scene?
+ ✔ transition on zoom to show element @done (13-05-02 17:41)
+ ✔ "fade" out scene? @done (13-05-02 17:41)
  ☐ look at custom attrs
  ✔ callback of scene ready @done (13-05-01 16:07)
  ✔ create moar scenery @done (13-05-02 10:21)
+ ☐ 
 
  ✔ turn on setinterobj() @done (13-05-01 11:07)
 
