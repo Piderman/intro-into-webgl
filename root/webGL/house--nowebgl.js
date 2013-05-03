@@ -17,11 +17,16 @@
 				src : "/webgl/nowebgl/rotate-3.jpg"
 			}
 		],
-		hitboxes : [
-			{ name : "bushes", rotateIndex : 0, dialogueID : "zoom0" },
-			{ name : "deck", rotateIndex : 1, dialogueID : "zoom0" },
-			{ name : "sideDoor", rotateIndex : 2, dialogueID : "zoom0" },
-			{ name : "rearRoof", rotateIndex : 3, dialogueID : "zoom0" }
+		hitbox : [
+			{ name : "bushes", rotateIndex : 0, dialogueID : "zoom0", position : {x: 640, y : 570} },
+			{ name : "deck", rotateIndex : 1, dialogueID : "zoom1", position : {x: 480, y : 480} },
+			{ name : "sideDoor", rotateIndex : 2, dialogueID : "zoom2", position : {x: 930, y : 400} },
+			{ name : "rearRoof", rotateIndex : 3, dialogueID : "zoom3", position : {x: 870, y : 370} },
+			{ name : "frontWindow", rotateIndex : 0, dialogueID : "zoom4", position : {x: 520, y : 260} },
+			{ name : "sideRoof", rotateIndex : 2, dialogueID : "zoom5", position : {x: 560, y : 290} },
+			{ name : "rearPool", rotateIndex : 3, dialogueID : "zoom6", position : {x: 570, y : 780} },
+			{ name : "frontRoom", rotateIndex : 0, dialogueID : "zoom7", position : {x: 1080, y : 380} },
+			{ name : "rearDoor", rotateIndex : 3, dialogueID : "zoom8", position : {x: 1070, y : 480} }
 		]
 	}
 	//do button logic to "rotate" the imgs
@@ -34,10 +39,13 @@
 		createElements();
 		cacheImages();
 
+		createHitboxes();
+
 
 	}
 	function createElements() {
 		$body = $("body");
+		$container = $("#container");
 
 		$buttonLeft = $("<button>", {
 			"class" : "camera__button camera__button__left",
@@ -53,7 +61,7 @@
 			adjustSceneFromButton("next");
 		}).appendTo($body);
 
-		$houseImage = $("<img>").prependTo($("#container"));
+		$houseImage = $("<img>").prependTo($container);
 
 		$overlay = $("#overlay").fadeOut();
 
@@ -70,10 +78,49 @@
 		// });
 	}
 
+	function createHitboxes() {
+		for (var i = 0; i < house.hitbox.length; i++) {
+			$("<button>", {
+				"class" : "hitbox",
+				"text" : "show " + house.hitbox[i].dialogueID,
+				"data-dialogue-id" : house.hitbox[i].dialogueID,
+				"data-rotate-index" : house.hitbox[i].rotateIndex,
+			}).css({
+				"left": house.hitbox[i].position.x,
+				"top": house.hitbox[i].position.y
+			})
+			.on("click", function(){
+				showSceneDialogue($(this).data("dialogue-id"));
+			}).appendTo($container);
+		};
+
+		//add to global once we have them
+		$hitbox = $container.find("button.hitbox");
+		setCurrentHitbox();
+	}
+
+	function showSceneDialogue(dialogueID) {
+		$("div.popup").hide() //hide all
+			.filter( function() {
+				return $(this).attr("id") == dialogueID; //filtered to only the current one to then show
+		}).show();
+	}
+
+	function setCurrentHitbox() {
+		var $hitboxInView = $hitbox.filter(function(){
+				return $(this).data("rotate-index") == house.currentView;
+			}),
+			$hitboxNotInView = $hitbox.filter(function(){
+				return $(this).data("rotate-index") != house.currentView;
+			});
+
+		
+		$hitboxInView.show();
+		$hitboxNotInView.hide();
+	}
 
 	function adjustSceneFromButton (dir) {
 		(dir=="next") ? house.currentView++ : house.currentView--;
-		console.log(house.currentView);
 		
 		//what about endpoints?
 		if (house.currentView < 0 ) {
@@ -81,8 +128,8 @@
 		} else if (house.currentView > house.rotation.length - 1) {
 			house.currentView = 0;
 		}
-		console.log("after", house.currentView);
 		setImageViewTo(house.currentView);
+		setCurrentHitbox();
 
 	}
 	//load all mah imgs once, starting from the top to the bottom so the last img loaded is index 0 
