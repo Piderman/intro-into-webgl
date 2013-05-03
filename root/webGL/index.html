@@ -8,7 +8,7 @@
 		html { overflow: hidden;}
 		/* force all to be as tall as window */
 		html, body, #container { height: 100%; }
-		body { margin: 0; padding: 0; font-family: "Segoe UI"}
+		body { margin: 0; padding: 0; font-family: "Segoe UI", Helvetica, Arial}
 		canvas { width: 100%; height: 100%; }
 
 		.camera__button {
@@ -21,7 +21,7 @@
 			background: #444;
 			border: 0;
 			color: #ebebeb;
-			font-family: "Segoe UI"; font-size: 24px;
+			font-family: "Segoe UI", Helvetica, Arial; font-size: 24px;
 			vertical-align: middle;
 			line-height: 1;
 			cursor: pointer;
@@ -85,10 +85,12 @@
 		/* non-webgl fallback*/
 		.hitbox {
 				position: absolute; left: 0; top: 0;
-				background: transparent; border: 1px solid #fff; opacity: 0.5;
+				background: #fff; border: 1px solid #fff; opacity: 0; filter : alpha(opacity=0);
 				width: 200px; height: 200px; padding: 0;
 				cursor: pointer;
 		}
+
+		footer { display: none; }
 	</style>
 	<script src="/libs/modernizr.custom.81962.js"></script>
 	</head>
@@ -174,15 +176,24 @@
 			z: <span id="cameraCoords__z"></span>
 		</div>
 
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script type="text/javascript">
-			Modernizr.load( {
-				test : Modernizr.webgl,
-				nope: "house--nowebgl.js",
-				yep: ["/libs/three.min.js", "/libs/controls/OrbitControls.js", "/libs/tween.min.js", "/libs/stats.min.js","house.three.js"]
-			});
-		</script>
-
 		<footer><small>house mesh from <a href="http://www.sharecg.com/pf/full_uploads.php?pf_user_name=matesmi">matesmi</a>. http://www.sharecg.com/v/14941/3d-model/Beach-House</small></footer>
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+		<!--[if IE]>
+			<script src="house--nowebgl.js"></script>
+		<![endif]-->
+		<!--[if !IE]> -->
+			<script type="text/javascript">
+				//Modernizr.webgl technically works, but my WebGL failboated on iPad (as expected). Do our own detection?
+
+				Modernizr.load( {
+					test : Modernizr.touch,
+					yep: "house--nowebgl.js",
+					nope: ["/libs/three.min.js", "/libs/controls/OrbitControls.js", "/libs/tween.min.js", "/libs/stats.min.js","house.three.js"]
+				});
+			</script>
+		<!-- <![endif]-->
+			
+
 	</body>
 </html>

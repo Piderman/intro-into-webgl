@@ -56,7 +56,7 @@
 
 	$container = $("#container");
 
-	var container, camera, controls, scene, renderer, stats, isOrbit = false, isDebugCoords = false, isSideOn = false, mouse = new THREE.Vector2(),
+	var container, camera, controls, scene, renderer, stats, isOrbit = false, isDebugCoords = false, isSideOn = false,
 		house = {
 			"currentView" : 0, //index of camera pos arr to shoy
 			"isNormal" : true, //are we normal or zoomed out?
